@@ -41,6 +41,7 @@ A data loader helper function was written in order to facilitate data retrieval 
 #### Metrics
 A set of functions were created in the dataset class in order to calculate the statistics of the train and validation splits in order to track progress throughout the development of the network. The accuracy, ~~precision, mean average precision~~, intersection over union, and mean intersection over union were gathered, always ignoring the label 255 of the Cityscapes dataset. 
 
+
 ## Architectures
 ### Network
 The U-net is a fully convolutional network created specifically for computer vision problems, including segmentation tasks. It became popular because of its efficient use of the GPU and its ability to learn with a limited dataset. What makes the U-net noble from other network architectures is that every pooling layer is mirrored by an up-sampling layer. The following figure shows the U-net contracting path (left side) and an expansive path (right side), both of which are symmetrically structured.
@@ -79,11 +80,13 @@ as well as how the layers were implemented in the network's forward function,
 ## Results
 Throughout the process of advancing the network, multiple experiments were conducted in order to track progress. 
 
+
 ### Experiment 1: Base-line
 The first experiment was intended to act as a base-line for the all future experiments. It consisted of the network training with the Adam optimizer. 
 (statistics image)
 
 ### Experiment 2: Stochastic Gradient Descent
+>>>>>>> 29faa2950c1d0c26a71f656cdcaf98b384b58370
 For the second experiment, the Adam optimizer was replaced with the SGD optimizer. 
 (statistics image)
 
@@ -149,7 +152,6 @@ The previous metrics were taken in the validation phase of our training. Conclud
 | SGD (0.1) | UNet| Transpose| | | 
 |  | Deeplabv3 | | | | 
 |  | Deeplabv3 | |Weather DA | | 
-
 
 ## Conclusion
 
