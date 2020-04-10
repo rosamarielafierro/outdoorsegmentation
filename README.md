@@ -86,7 +86,6 @@ The first experiment was intended to act as a base-line for the all future exper
 (statistics image)
 
 ### Experiment 2: Stochastic Gradient Descent
->>>>>>> 29faa2950c1d0c26a71f656cdcaf98b384b58370
 For the second experiment, the Adam optimizer was replaced with the SGD optimizer. 
 (statistics image)
 
