@@ -119,7 +119,7 @@ For the second experiments, we improved the network to embrace the concatenation
                                 nn.Conv2d(in_channels, out_channels, kernel_size=1))
 
 We don't see any noticeable difference in the loss plot between these two versions
-![loss331vs1](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/loss331vs1.gif)
+![loss331vs1](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/loss331vs1.png)
 
 ### Experiment 3: Data Augmentation
 
@@ -185,9 +185,9 @@ The previous metric is a generalization of how our model works overall. This nex
 As we presented in the dataset statistics, we have a noticeable class imbalance, which ends up in an unbalanced IoU. The classes that appear the most in the dataset (pavement, sky) reach a higher IoU than the ones that appear very few times (signals, traffic lights)
 
 
-| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 
-|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
-| 0.80 | 0.64 | 0.84 | 0.25 | 0.12 | 0.39 | 0.32 | 0.49 | **0.87** | 0.44 | 0.86 | 0.43 | 0.21 | 0.83 | 0.11 | 0.22 | **0.00** | 0.07 | 0.50 |  |  |  |  |  |
+| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 |
+|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
+| 0.80 | 0.64 | 0.84 | 0.25 | 0.12 | 0.39 | 0.32 | 0.49 | **0.87** | 0.44 | 0.86 | 0.43 | 0.21 | 0.83 | 0.11 | 0.22 | **0.00** | 0.07 | 0.50 |
 
 
 #### mIoU
