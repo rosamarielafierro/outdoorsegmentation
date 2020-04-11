@@ -1,7 +1,7 @@
+
 ## Repository Structure
 
 The repository is structured as follows:
- - Cityscapes - folder containing cityscapes dataset.
  - Figures - folder containing project images.
  - Dataset.py - python file containing the dataset class.
  - Train.py - python file containing the train class.
@@ -13,14 +13,26 @@ The repository is structured as follows:
 
 ### About
  - Date: 14/4/2020
- - Authors: Alberto Masa, Fernando Tibet, Mariela, Sina Sadeghi
+ - Authors: Alberto Masa, Fernando del Tíbet, Mariela, Sina Sadeghi
  - Institute: Universitat Politecnica De Cataluña
 
 ## Motivation
 
+Our field of interest was driving-related topics. This includes a deeper understanding of image-video processing for understanding the context around the vehicle to improve safety.
+
 ## Proposal
+*This is copied from the presentation. Maybe we can detail this with what we've done*
+ 1. Analyze the data provided in the selected dataset and adapt it to be used in a Semantic Segmentation network.
+ 2. Mitigate the class imbalance based on a better understanding of our data.
+ 3. Learn how to do a transfer learning from the previous task to another one, for instance, detecting the drivable area.
+ 4. Reproduce a semantic segmentation network described in the U-Net paper from scratch.
+ 5. Apply data augmentation, generate different kinds of weather such as fog, rain, snowflakes.
+
 
 ## Milestones
+
+
+
 
 ## Cityscapes Dataset
 The cityscapes dataset includes a diverse set of street scene image captures from 50 different cities. The dataset includes semantic, instance-wise, and dense pixel annotation for a total of 19 classes. The dataset includes 5,000 images at a resolution of 1024x2048. 
@@ -46,7 +58,7 @@ A set of functions were created in the dataset class in order to calculate the s
 ### Network
 The U-net is a fully convolutional network created specifically for computer vision problems, including segmentation tasks. It became popular because of its efficient use of the GPU and its ability to learn with a limited dataset. What makes the U-net noble from other network architectures is that every pooling layer is mirrored by an up-sampling layer. The following figure shows the U-net contracting path (left side) and an expansive path (right side), both of which are symmetrically structured.
 
-![Unet Model Diagram](https://github.com/it6aidl/outdoorsegmentation/blob/master/Unet%20-%20Basic.png)
+![Unet Model Diagram](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Unet%20-%20Basic.png)
 
 This allows the network to reduce spatial information while increasing feature information on its way down, and reduce feature information while increasing station information on the way up, leading to highly efficient image processing. The U-net class is defined as follows,
 
@@ -58,10 +70,10 @@ This allows the network to reduce spatial information while increasing feature i
 ### Concatenation Layer
 Since the U-net downsamples the feature information in the first half of the network, there is a risk of loosing valuable information. To overcome this, we concatenated all the feature maps in the decoding layers with the feature maps from the encoding layers. This assures that any information learned in the ignitions layers will be retained throughout the network. 
 
-![Concat Layers](https://github.com/it6aidl/outdoorsegmentation/blob/master/Unet%20-%20Concat.png)
+![Concat Layers](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Unet%20-%20Concat.png)
 
 ### Bi-linear Interpolation
-As the input images run through the encoding layers they loose their position information, which is vital for segmentation tasks. Therefore, after 5 layers of pooling the network has 5 layers of up-sampling to return the image to its original dimensions. For the initial attempt, bi-linear interpolation was used as the upsampling technique. 
+As the input images run through the encoding layers they loose their position information, which is vital for segmentation tasks. Therefore, after 5 layers of pooling the network has 5 layers of up-sampling to return the image to its original dimensions. For the initial attempt, bi-linear interpolation was used as the upsampling technique.
 
 Bi-linear interpolation, or bi-linear filtering, interpolating along two axis in order to upsample data. 
 
@@ -80,16 +92,38 @@ as well as how the layers were implemented in the network's forward function,
 ## Results
 Throughout the process of advancing the network, multiple experiments were conducted in order to track progress. 
 
+**Tenemos que decidir en qué experimento ponemos gráficas/tablas **
 
-### Experiment 1: Base-line
-The first experiment was intended to act as a base-line for the all future experiments. It consisted of the network training with the Adam optimizer. 
+### Experiment 1: Linear UNet
+The first experiment was intended to act as a base-line for the all future experiments. It consisted of a linear version (removing the concatenations) of the UNet using Adam optimizer. This lightweight version works for us to see a quick segmentation result that is easy to understand and easy to be improved by adding components to the configuration. On the other hand it gives very little precision to the prediction. The architecture is presented in the figure #1 and the method to upsample is *torch.nn.Upsample*. 
+
 (statistics image)
 
-### Experiment 2: Stochastic Gradient Descent
-For the second experiment, the Adam optimizer was replaced with the SGD optimizer. 
-(statistics image)
+![Linear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/linear.gif)
+
+### Experiment 2: Concat UNet
+For the second experiments, we improved the network to embrace the concatenations defined in the canonical net. Also, we implemented another way to upsample the encoded data in the net through Transposed convolutions.
+
+![Bilinear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/bilinear.gif)
+
+#### Transpose Kernel 3 Padding 1 vs Transpose Kernel 1
+*Explicar porqué hemos hecho esto*
+
+
+    self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+                                nn.Conv2d(in_channels, out_channels, kernel_size=3, padding= 1))
+  ---
+
+    self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+                                nn.Conv2d(in_channels, out_channels, kernel_size=1))
+
+We don't see any noticeable difference in the loss plot between these two versions
+![loss331vs1](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/loss331vs1.gif)
 
 ### Experiment 3: Data Augmentation
+From the beginning of the project we wanted to implement this classic ML technique to boost the model prediction. In spite of this technique be often used to reduce overfitting, we have not suffered such, but anyway we have implemented it.
+
+
 A data augmentation class was created in order to expand our dataset. This experiment featured the SGD optimizer coupled with flips and random noise.
 (statistics image)
 
@@ -103,6 +137,7 @@ In order for the network to prepare for varying road scenarios, in this experime
 
 ### Experiment 6: Deep Lab
 Finally, the entire project was run using the pre-w eighted Deep Lab model to compare the results to our U-net.
+*Aqui hemos cambiado la LR. Vemos que cuando es 0.1 el error da muchos bandazos en comparacion con 1e3. Podemos compararlos aqui*
 (statistics image)
 
 
@@ -148,13 +183,16 @@ The previous metrics were taken in the validation phase of our training. Conclud
 |  | Deeplabv3 | | |76.86 | 39
 | SGD (0.001) | UNet | Transpose| |75.3 | 31
 |  | Deeplabv3 | | | | 
-| SGD (0.1) | UNet| Transpose| | | 
+| SGD (0.1) | UNet| Transpose| | 78.73| 46
 |  | Deeplabv3 | | | | 
 |  | Deeplabv3 | |Weather DA | | 
 
 ## Conclusion
 
 (we should decide what out conclusions for the project are and insert here)
+
+
+
 
 ## Future Work
 
