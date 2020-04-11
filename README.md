@@ -118,7 +118,7 @@ For the second experiments, we improved the network to embrace the concatenation
                                 nn.Conv2d(in_channels, out_channels, kernel_size=1))
 
 We don't see any noticeable difference in the loss plot between these two versions
-![loss331vs1](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/loss331vs1.gif)
+![loss331vs1](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/loss331vs1.png)
 
 ### Experiment 3: Data Augmentation
 From the beginning of the project we wanted to implement this classic ML technique to boost the model prediction. In spite of this technique be often used to reduce overfitting, we have not suffered such, but anyway we have implemented it.
