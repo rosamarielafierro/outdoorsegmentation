@@ -20,7 +20,7 @@ The repository is structured as follows:
 
 ## Motivation
 
-Our field of interest was driving-related topics. This includes a deeper understanding of image-video processing for understanding the context around the vehicle to improve safety.
+Based on our team's collective interest in computer vision we decided to pursue a semantic segmentation task, using deep learning to classify objects in road scenarios to further the development of self-driving cars.
 
 ## Proposal
  - [x] Analyze the data provided in the selected dataset and adapt it to be used in a Semantic Segmentation network.
