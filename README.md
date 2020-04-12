@@ -52,11 +52,11 @@ shown more clearly in the following code,
 
 ![Dataset Class Code](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Dataset%20Code.png)
 
+The loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. 
 
-The loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. A snippet of the transformation code is presented below,
+A snippet of the transformation code is presented below,
 
 ![Transformation Code](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Transform%20Code.png)
-
 
 In order to increase the flexibility of the network, a "Split_Generator" was created to produce a .csv file containing the URLS linking the dataset images and targets. The dataset class uses the .csv to locate the data in preparation for training. The following number of images and targets where used for each split:
 
