@@ -48,10 +48,6 @@ A custom dataset class capable of loading the images and targets from the Citysc
 -   len( ) - returns dataset size.
 -   getitem( ) - loads and transforms image/target.
 
-shown more clearly in the following code,
-
-![Dataset Class Code](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Dataset%20Code.png)
-
 The loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. 
 
 A snippet of the transformation code is presented below,
