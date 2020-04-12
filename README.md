@@ -1,4 +1,5 @@
 
+
 ## Repository Structure
 
 The repository is structured as follows:
@@ -98,14 +99,15 @@ The first 6 experiments consists of adjusting configurations for the network its
 ### Experiment 1: Linear UNet
 The first experiment was intended to act as a base-line for the all future experiments. It consisted of a linear version (removing the concatenations) of the UNet using Adam optimizer. This lightweight version works for us to see a quick segmentation result that is easy to understand and easy to be improved by adding components to the configuration. On the other hand it gives very little precision to the prediction. The architecture is presented in the figure #1 and the method to upsample is *torch.nn.Upsample*. 
 
-(statistics image)
 
-![Linear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/linear.gif)
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamlinearloss.png)
+
 
 ### Experiment 2: Concat UNet
 For the second experiments, we improved the network to embrace the concatenations defined in the canonical net. Also, we implemented another way to upsample the encoded data in the net through Transposed convolutions.
 
-![Bilinear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/bilinear.gif)
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adambilinearloss.png)
+
 
 #### Transpose Kernel 3 Padding 1 vs Transpose Kernel 1
 *Explicar porqué hemos hecho esto*
@@ -117,56 +119,57 @@ For the second experiments, we improved the network to embrace the concatenation
 
     self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
                                 nn.Conv2d(in_channels, out_channels, kernel_size=1))
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransloss.png)
 
-We don't see any noticeable difference in the loss plot between these two versions
-![loss331vs1](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/loss331vs1.png)
 
-### Experiment 3: Data Augmentation
+### Experiment 3: Change optimizer
+
+After running different configurations, we chose the one to perform the rest of the experiments: transposed convolutions UNet. This gave us the better validation results (by a small margin though) than the upsampling version.
+Then, before introducing the ML techniques, we decided to change the optimizer for SGD to see how it performed.
+
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/sgdtransloss.png)
+
+
+### Experiment 4: Data Augmentation
 
 From the beginning of the project we wanted to implement this classic ML technique to boost the model prediction. In spite of this technique be often used to reduce overfitting, we have not suffered such, but we wanted to test our net and see how the affected accuracy in validation and test. The transformations done to the images comprehend random horizontal flips and modifications to brightness, contrast, saturation and hue.
 
-This is the result:
-![acctransvsda](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/acctransvsda.png)
-
-There really is no noticeable improvement after adding this transformations. We expected it also in the test results, but we did not get there an improvement either:
-
-| Configuration| Accuracy | mIoU 
-|--|--| --|
-| Normal |78.3  |43
-| Data augmentation | 77.3  |39
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransdaloss.png)
 
 
-### Experiment 4: Inverted Weight
+
+### Experiment 5: Inverted Weight
 Weights were added to the loss using the inverted frequency. Using the information obtained from train split, the inverted frequency was calculated for each class.
 **Creo que alberto puede explicar mejor esta parte**
-(statistics image)
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransdainvloss.png)
 
-### Experiment 5: Weather Augmentation
+### Experiment 6: Weather Augmentation
 In order for the network to prepare for varying road scenarios, in this experiment, it was trained while running the weather augmentation online to generate rain and snow. 
 After running the data augmentation experiment and even though not having valuable results, we decided to include some realistic data augmentation. In our case, driving scenario, would be very helpful to add circumstances that drivers find on the daily. Of course, this should help the model to generalize better in exchange of a decreasing validation accuracy. 
 The photos were added a layer of one of these elements (rain, snow, clouds, fog) *using python library imgaug*.
 
-**Cuando hagamos el experimento online bien enchufarle una gráfica**
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransweloss.png)
 
-### Experiment 6: Deep Lab
+### Experiment 7: Deeplabv3
 Finally, the entire project was run using the pre-w eighted Deep Lab model to compare the results to our U-net.
 **Creo que alberto puede explicar mejor esta parte**
 
-*(maybe architecture or some other graph)*
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamdeeplabloss.png)
 
-### Experiment 7: Change optimizer
+### Experiment 8: Change Deeplabv3 optimizer
 
-After all the "heavy" experiments, we decided to play a bit with the configuration, and swapped between common optimizers that might help us with better results after several failed attempts and give us some fresh air.
-In the next figure we can see that after a similar start in the first 15 epochs, and penalized by the low start, SGD has a steeper mIoU curve and might need more epochs to reach Adam's performance in this metric.
 
-![miouadamvssgd](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/miouadamvssgd.png)
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/sgddeeplabloss.png)
 
-### Experiment 8: Change learning rate
 
-Our last experiment was changing the learning rate of the optimizer. We did it on several configurations, both UNet and Deeplabv3 and both Adam and SGD, and here we can notice a real change.
+### Experiment 9: Change learning rate
 
-![miou01vs0001](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/miou01vs0001.png)
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/sgd01deeplabloss.png)
 
+
+### Experiment 10: Add weather data augmentation
+
+** Experimento en marcha 12.04 13:50 **
 
 ### Metrics
 
@@ -196,6 +199,25 @@ The other metric that illuminated our grievous path through the fathomless darkn
 
 *(mIoU graph comparing valuable experiments)*
 
+
+#### Validation results
+
+| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
+|--|--|--|--|--|--|
+| Adam (0.001) |  UNet| Linear||82.25 | 40.1
+|  |  | Bilinear 3x3/1||83.13 |41.7
+|  |  | Bilinear 1x1|| 83.46 | 43.23
+|  |  | Transpose| |83.64|44.01  
+| SGD (0.001) | | Transpose|| 80.89|34.26 
+| Adam (0.001) |  | Transpose|DA | 82.77| 41.33
+|  |  | Transpose|DA & IF |75.14|35.09
+|  |  | Transpose|Weather DA |81.28|38.41 
+|  | Deeplabv3 | | |82.32|39.47 
+| SGD (0.001) | Deeplabv3 | | | | 
+| SGD (0.1) | Deeplabv3 | | |83.99|46.64 
+|  | | |Weather DA | | 
+
+
 #### Test results
 
 The previous metrics were taken in the validation phase of our training. Concluding the experiment we test the model configuration with the test dataset. The results in this phase give us an overall understanding of the performance. 
@@ -207,19 +229,51 @@ The previous metrics were taken in the validation phase of our training. Conclud
 |  |  | Bilinear 3x3/1| | 77.9| 40
 |  |  | Bilinear 1x1| |78.5 | 42
 |  |  | Transpose| | 78.3| 43
-|  |  | Transpose|DA |77.3 | 39
+| SGD (0.001) | | Transpose| |75.3 | 31
+| Adam (0.001) |  | Transpose|DA |77.3 | 39
 |  |  | Transpose|DA & IF |70.16 |34 
-|  |  | Transpose|Weather DA | | 
+|  |  | Transpose|Weather DA |75.72 | 35
 |  | Deeplabv3 | | |76.86 | 39
-| SGD (0.001) | UNet | Transpose| |75.3 | 31
-|  | Deeplabv3 | | | | 
-| SGD (0.1) | UNet| Transpose| | |
-|  | Deeplabv3 | | |78.73| 46
-|  | Deeplabv3 | |Weather DA | | 
+| SGD (0.001) | Deeplabv3 | | | | 
+| SGD (0.1) | Deeplabv3 | | |78.73| 46
+|  | | |Weather DA | | 
+
+
+### Other comparisons
+
+
+We don't see any noticeable difference in the loss plot between these two versions
+![loss331vs1](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/loss331vs1.png)
+
+---
+
+After all the "heavy" experiments, we decided to play a bit with the configuration, and swapped between common optimizers that might help us with better results after several failed attempts and give us some fresh air.
+In the next figure we can see that after a similar start in the first 15 epochs, and penalized by the low start, SGD has a steeper mIoU curve and might need more epochs to reach Adam's performance in this metric.
+![miouadamvssgd](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/miouadamvssgd.png)
+
+---
+
+![acctransvsda](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/acctransvsda.png)
+
+There really is no noticeable improvement after adding this transformations. We expected it also in the test results, but we did not get there an improvement either:
+
+| Configuration| Accuracy | mIoU 
+|--|--| --|
+| Normal |78.3  |43
+| Data augmentation | 77.3  |39
+
+---
+
+Our last experiment was changing the learning rate of the optimizer. We did it on several configurations, both UNet and Deeplabv3 and both Adam and SGD, and here we can notice a real change.
+
+![miou01vs0001](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/miou01vs0001.png)
+
 
 ## Conclusion
 
 (we should decide what out conclusions for the project are and insert here)
+![Linear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/linear.gif)
+![Bilinear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/bilinear.gif)
 
 
 
