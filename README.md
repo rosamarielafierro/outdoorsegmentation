@@ -50,7 +50,7 @@ A custom dataset class capable of loading the images and targets from the Citysc
 
 The loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. 
 
-A snippet of the transformation code is presented below,
+A snippet of the transformation code and data loaders is presented below,
 
 ![Transformation Code](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Transform%20Code.png)
 
