@@ -37,7 +37,7 @@ Our field of interest was driving-related topics. This includes a deeper underst
  - [x] Apply data augmentation.
  - [ ] Use model for selecting drivable area.
 
-## Cityscapes Dataset
+## Dataset
 The Cityscapes dataset includes a diverse set of street scene image captures from 50 different cities around the world designed specifically for training segmentation models. The dataset includes semantic, instance-wise, and dense pixel annotation for a total of 30 classes. The dataset consists of 5,000 images at a resolution of 1024x2048.
 
 ![Cityscapes](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Cityscapes.png)
@@ -52,9 +52,11 @@ shown more clearly in the following code,
 
 ![Dataset Class Code](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Dataset%20Code.png)
 
+
 The loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. A snippet of the transformation code is presented below,
 
 ![Transformation Code](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Transform%20Code.png)
+
 
 In order to increase the flexibility of the network, a "Split_Generator" was created to produce a .csv file containing the URLS linking the dataset images and targets. The dataset class uses the .csv to locate the data in preparation for training. The following number of images and targets where used for each split:
 
