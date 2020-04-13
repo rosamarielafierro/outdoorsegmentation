@@ -2,7 +2,7 @@
 
 The repository is structured as follows:
  - Figures - folder containing project images.
- - Toolbox - folder containing two auxiliar tools for working with the dataset: transforming the labels merging some of the clases, creating csv files for loading the images in the dataset and getting stats for class imbalance.
+ - Toolbox - folder containing two auxiliar tools for working with the dataset: transforming the labels merging some of the classes, creating csv files for loading the images in the dataset and getting stats for class imbalance.
  - Dataset.py - python file containing the dataset class.
  - Train.py - python file containing the train class.
  - Test.py - python file used for doing only the Test step.
@@ -175,7 +175,7 @@ In the original experiment, shown before, we included the Kernel size 1 in the l
                               nn.Conv2d(in_channels, out_channels, kernel_size=1))
 ~~~
 
-*FALTA EL RESULTADO CON EL KERNEL 3*
+However, the results were not good enough and seems to not support this hypothesis. 
 
 #### Results
 
@@ -254,7 +254,7 @@ After running the data augmentation experiment and even though not having valuab
 The photos were added a layer of one of these elements (rain, snow, clouds, fog) *using python library [imgaug](https://imgaug.readthedocs.io/en/latest/)*.
 
 An example of the effect of this transformations using Fog can be shown here
-![weather images](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/Weather_effect.png)
+![weather images](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Weather_effect.png)
 
 And the results:
 
@@ -320,7 +320,7 @@ As the last experiment, we added the same weather data augmentation we performed
 | SGD (0.1) | Deeplabv3 | |Weather DA | 66.32| 17
 
 
-The model has been penalized in the validation dataset but will generalize better for new real world samples. If we compare the results of our best model (DeepLabv3 - SGD - lr=1e-1) that achieved and mIoU of 46% in Test, and this model trained with weather conditions, all against the Test split including weather conditions we can see this effect:
+The model has been penalized in the validation dataset but will generalize better for new real world samples. If we compare the results of our best model (DeepLabv3 - SGD - lr=1e-1) that achieved a mIoU of 46% in Test, and this model trained with weather conditions, all against the Test split including weather conditions we can see this effect:
 
 |Trained with weather conditions|Accuracy (%)| mIoU (%)| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15| 16 | 17 | 18 |
 |--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
@@ -440,5 +440,7 @@ Focal loss was also amongst them but we invested a lot of time running all the m
 
 ## References
 [1]: Olaf Ronneberger, Philipp Fischer, Thomas Brox. "U-Net: Convolutional Networks for Biomedical Image Segmentation". CVPR, 2015. https://arxiv.org/abs/1505.04597
+
 [2]: imgaug library https://imgaug.readthedocs.io/en/latest/
+
 [3]: Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam. "Rethinking Atrous Convolution for Semantic Image Segmentation". CVPR, 2017. https://arxiv.org/abs/1706.05587
