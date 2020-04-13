@@ -107,37 +107,54 @@ where f(x,y) is the unknown function, in our case pixel intensity, and the four 
 ### Transposed Convolutions
 To improve the quality and efficiency of the upsampling, the bi-linear interpolation was replaced by transposed convolutions. These convolutions make use of learneable parameters to enable the network to “learn” how to best transform each feature map on its own.
 
+### DeepLabv3
+As a way to test a different approach, and trying to improve the results, we tested a different model: DeepLabv3. Here, we picked the version already existing and pretrained in Torchvision. This architecture review how atrous convolutions are applied to extract dense features for semantic segmentation and how to use a combination of them in parallel under the concept of Atrous Spatial Pyramid Pooling.  
+
+![Deeplabv3](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/deeplabv3.png)
+
 ## Results
 Throughout the process of advancing the network, multiple experiments were conducted in order to track progress. What drove us during the whole process of experimentation was evidence :eyes:. What we searched over and over was improvement :sunrise_over_mountains:. But we didn't find it :trollface:, at least how we expected. We expected to see results as we have been seeing in the labs and in the ML books, but maybe we had a stroke of reality. This is the nature of science and engineering :smirk:. We stuck with the configuration that gave us better results until the moment and build on top of it.
 The first 6 experiments consists of adjusting configurations for the network itself and adding ML techniques. For the last two experiments we wanted to play a little bit and test the theoretical part we learned in class: we changed the optimizer for our network and an hyperparameter, the learning rate.
 
-**Fer: pongo algunas gráficas y tablas y después con Albert&co vemos cual son más significativas **
+**Fer: pongo algunas gráficas y tablas y después con Albert&co vemos cual son más significativas**
 
 ### Experiment 1: Linear UNet
-The first experiment was intended to act as a base-line for the all future experiments. It consisted of a linear version (removing the concatenations) of the UNet using Adam optimizer. This lightweight version works for us to see a quick segmentation result that is easy to understand and easy to be improved by adding components to the configuration. On the other hand it gives very little precision to the prediction. The architecture is presented in the figure #1 and the method to upsample is *torch.nn.Upsample*.
+The first experiment was intended to act as a base-line for the all future experiments. It consisted of a linear version (not including the concatenations) of the UNet, and using Adam optimizer. This lightweight version works for us to see a quick segmentation result that is easy to understand and easy to be improved by adding components to the configuration. On the other hand it gives very little precision to the prediction. The architecture is presented in the figure #1 and the method to upsample is *torch.nn.Upsample*.
 
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamlinearloss.png)
 
 
 ### Experiment 2: Concat UNet
-For the second experiments, we improved the network to embrace the concatenations defined in the canonical net. Also, we implemented another way to upsample the encoded data in the net through Transposed convolutions.
+For the second experiment, we improved the network to embrace the concatenations defined in the canonical net, as described in the original paper we are taking as a reference. In future experiments, we implemented another way to upsample the encoded data in the net through Transposed convolutions.
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adambilinearloss.png)
 
+The results, apart from the quantitative side, have shown a real qualitative effect in the sharpness of the predictions, as can be seen in the following comparison. In the left hand side we can see the predictions from the model with the concatenations whereas in the right hand side we can see the results of the architecture without these conections.
 
-#### Transpose Kernel 3 Padding 1 vs Transpose Kernel 1
-*Explicar porqué hemos hecho esto*
+[Effect of concatenations](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/effectofconcatenation.png)
 
 
+#### Kernel 3 Padding 1 vs Kernel 1
+In the original experiment, we included the Kernel size 1 in the last step as presented in the original paper. However, we wanted to test if   
+
+This way, we modified the last pass this way, using a Kernel 3x3 with padding=1, as a way to
+
+~~~
     self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
                                 nn.Conv2d(in_channels, out_channels, kernel_size=3, padding= 1))
   ---
 
     self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
-                                nn.Conv2d(in_channels, out_channels, kernel_size=1))
-![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransloss.png)
+                              nn.Conv2d(in_channels, out_channels, kernel_size=1))
+~~~
 
+*FALTA EL RESULTADO CON EL KERNEL 3*
+
+#### Transposed convolutions
+The following experiment we try, was changing the bilinear interpolations in the upsampling for transposed convolutions, as commented above. The results are shown in the following graph.
+
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransloss.png)
 
 ### Experiment 3: Change optimizer
 
@@ -304,3 +321,4 @@ Our last experiment was changing the learning rate of the optimizer. We did it o
 ## References
 [1]: Olaf Ronneberger, Philipp Fischer, Thomas Brox. "U-Net: Convolutional Networks for Biomedical Image Segmentation". CVPR, 2015. https://arxiv.org/abs/1505.04597
 [2]: imgaug library https://imgaug.readthedocs.io/en/latest/
+[3]: Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam. "Rethinking Atrous Convolution for Semantic Image Segmentation". CVPR, 2017. https://arxiv.org/abs/1706.05587
