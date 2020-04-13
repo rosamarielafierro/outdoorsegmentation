@@ -4,8 +4,8 @@
 ## Repository Structure
 
 The repository is structured as follows:
- - aux - folder containing two auxiliar tools for working with the dataset: creating csv files for loading the images in the dataset and getting stats for class imbalance.
  - Figures - folder containing project images.
+ - Toolbox - folder containing two auxiliar tools for working with the dataset: creating csv files for loading the images in the dataset and getting stats for class imbalance.
  - Dataset.py - python file containing the dataset class.
  - Train.py - python file containing the train class.
  - Test.py - python file used for doing only the Test step.
@@ -136,9 +136,7 @@ The results, apart from the quantitative side, have shown a real qualitative eff
 
 
 #### Kernel 3 Padding 1 vs Kernel 1
-In the original experiment, we included the Kernel size 1 in the last step as presented in the original paper. However, we wanted to test if using a widther   
-
-This way, we modified the last pass this way, using a Kernel 3x3 with padding=1, as a way to
+In the original experiment, we included the Kernel size 1 in the last step as presented in the original paper. However, we wanted to test if using a widther kernel (3x3), it can keep better the spatial information for the feature extraction than the orginal 1x1 one.    
 
 ~~~
     self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
@@ -170,11 +168,17 @@ From the beginning of the project we wanted to implement this classic ML techniq
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransdaloss.png)
 
-
-
-### Experiment 5: Inverted Weight
+### Experiment 5: Weights - Inverted frequency
 Weights were added to the loss using the inverted frequency. Using the information obtained from train split, the inverted frequency was calculated for each class.
-**Creo que alberto puede explicar mejor esta parte**
+
+Based on the number of pixels for each class calculated above:
+~~~
+Number of pixels per class (train):
+[127414939, 21058643, 79041999, 2269832, 3038496, 4244760, 720425, 1911074, 55121339, 4008424, 13948699, 4204816, 465832, 24210293, 925225, 813190, 805591, 341018, 1430722, 43963883]
+~~~
+
+the inverted frequency is calculated as the inversion of the normalized number of pixels (normalizing by the total number of pixels). This is used to compensate the imbalance of the classes, as shown in the figure above.
+
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransdainvloss.png)
 
 ### Experiment 6: Weather Augmentation
