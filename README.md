@@ -127,7 +127,6 @@ As an optimizer we chose Adam because it needs no additional tuning or adjust hy
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamlinearloss.png)
 
 
-<<<<<<< HEAD
 ### Experiment 2: UNet
 For the second experiments, we improved the network to embrace the concatenations defined in the canonical net. After achieving a not so bad accuracy result of 75%, we moved on to reproduce the full UNet. This of course turned into computational and practical adjustments such as reducing the batch size and we had to wait longer for the experiment to give results.
 The UNet as it was created in [the paper](https://arxiv.org/abs/1505.04597) will give us more precision in the predictions since it adds every phase result of the encoder to the decoder to produce the output. Increase of prediction is really evident.
