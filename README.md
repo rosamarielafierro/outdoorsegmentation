@@ -175,7 +175,7 @@ In the original experiment, shown before, we included the Kernel size 1 in the l
                               nn.Conv2d(in_channels, out_channels, kernel_size=1))
 ~~~
 
-*FALTA EL RESULTADO CON EL KERNEL 3*
+However, the results were not good enough and seems to not support this hypothesis. 
 
 #### Results
 
@@ -254,7 +254,7 @@ After running the data augmentation experiment and even though not having valuab
 The photos were added a layer of one of these elements (rain, snow, clouds, fog) *using python library [imgaug](https://imgaug.readthedocs.io/en/latest/)*.
 
 An example of the effect of this transformations using Fog can be shown here
-![weather images](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/Weather_effect.png)
+![weather images](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Weather_effect.png)
 
 And the results:
 
