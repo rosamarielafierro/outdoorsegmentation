@@ -52,13 +52,14 @@ The following functions where included,
 -   len( ) - returns dataset size.
 -   getitem( ) - loads and transforms image/target.
 
-This Dataset class is also prepared to apply different kind of transformations for data augmentation. These transformations can be applied only to the images or to both the image and the target, controlling that the random transformations are applied at the same time. In addition, this class includes the weather transformation used for ensure the model is prepared to work in any climatological conditions.  
+This Dataset class is also prepared to apply different kind of transformations for data augmentation. These transformations can be applied only to the images or to both the image and the target, controlling that the random transformations are applied at the same time. In addition, this class includes the weather transformation used for ensure the model is prepared to work in any climatological conditions using [imgaug](https://imgaug.readthedocs.io/en/latest/).  
 
-By default, the loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. This resizing has been done due to reduce training resources required.
+By default, the loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. This resizing has been done for reducing the training resources required.
 
 A snippet of the transformation code and data loaders is presented below,
 
-'# Creamos los datasets y dataloaders
+~~~
+  # Creamos los datasets y dataloaders
   train_dataset = MyDataset(version=ds_version, split='train', joint_transform=joint_transforms, img_transform=img_transforms, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'])
   train_loader = utils.data.DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=4)
 
@@ -66,19 +67,15 @@ A snippet of the transformation code and data loaders is presented below,
   val_loader = utils.data.DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=4)
 
   test_dataset = MyDataset(version=ds_version, split='test', joint_transform=joint_transforms_vt, img_transform=img_transforms_vt, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'], add_weather= weather == 'y')
-  test_loader = utils.data.DataLoader(test_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=4)'
+  test_loader = utils.data.DataLoader(test_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=4)
+~~~
 
-
- The following number of images and targets where used for each split:
-
+In particular, we worked with CityScapes Fine annotations and 8-bit images. The following number of images and targets where used for each split:
 -   Test: 250
-
 -   Validation: 250
-
 -   Train: 2952
 
-
-As suggested by the Cityscapes documentation, classes with a label id of 255 were emitted, resulting in a total of 19 distinct classes: Road, Sidewalk, Building, Wall, Fence, Pole, Traffic Light, Traffic Sign, Vegetation, Terrain, Sky, Person, Rider, Car, Truck, Bus, Train, Motorcycle, and Bicycle. In order to know the kind of data we are working with, we created aux functions to calculate the statistics of the train and validation splits. This information was helpful to understand the class imbalance so that we can apply techniques to deal with it that we will explain above.
+As suggested by the Cityscapes documentation, classes with a label id of 255 were emitted, resulting in a total of 19 distinct classes: Road, Sidewalk, Building, Wall, Fence, Pole, Traffic Light, Traffic Sign, Vegetation, Terrain, Sky, Person, Rider, Car, Truck, Bus, Train, Motorcycle, and Bicycle. In order to know the kind of data we are working with, we created aux functions to calculate the [statistics](https://github.com/it6aidl/outdoorsegmentation/blob/master/aux/dataloader_stats.py) of the train and validation splits. This information was helpful to understand the class imbalance so that we can apply techniques to deal with it that we will explain above.
 
 ![Class stats](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Class_Stats.png)
 
@@ -306,3 +303,4 @@ Our last experiment was changing the learning rate of the optimizer. We did it o
 
 ## References
 [1]: Olaf Ronneberger, Philipp Fischer, Thomas Brox. "U-Net: Convolutional Networks for Biomedical Image Segmentation". CVPR, 2015. https://arxiv.org/abs/1505.04597
+[2]: imgaug library https://imgaug.readthedocs.io/en/latest/
