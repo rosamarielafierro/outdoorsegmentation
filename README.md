@@ -299,3 +299,4 @@ Our last experiment was changing the learning rate of the optimizer. We did it o
  - Focal Loss
 
 ## References
+[1]: Olaf Ronneberger, Philipp Fischer, Thomas Brox. "U-Net: Convolutional Networks for Biomedical Image Segmentation". CVPR, 2015. https://arxiv.org/abs/1505.04597
