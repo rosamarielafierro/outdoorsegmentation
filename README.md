@@ -1,7 +1,3 @@
-
-
-
-
 ## Repository Structure
 
 The repository is structured as follows:
@@ -18,7 +14,7 @@ The repository is structured as follows:
 
 ### About
  - Date: 14/4/2020
- - Authors: Alberto Masa, Fernando del Tíbet, Mariela Fierro, Sina Sadeghi
+ - Authors: Alberto Masa, Fernando Tébar, Mariela Fierro, Sina Sadeghi
  - Institute: Universitat Politecnica De Cataluña
 
 ## Motivation
@@ -398,21 +394,16 @@ Here we only compare the results of each of our best configurations for each of 
 
 ### Other comparisons
 
+In the next figure we can see that after a similar start in the first 15 epochs, and penalized by the low start, SGD has a steeper mIoU curve and might need more epochs to reach Adam's performance in this metric. Also, from the experience of the last experiments, it would have useful to risen the learning rate for SGD optimizer, even though the loss becomes more unstable.
 
-We don't see any noticeable difference in the loss plot between these two versions
-![loss331vs1](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/loss331vs1.png)
-
----
-
-After all the "heavy" experiments, we decided to play a bit with the configuration, and swapped between common optimizers that might help us with better results after several failed attempts and give us some fresh air.
-In the next figure we can see that after a similar start in the first 15 epochs, and penalized by the low start, SGD has a steeper mIoU curve and might need more epochs to reach Adam's performance in this metric.
 ![miouadamvssgd](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/miouadamvssgd.png)
 
 ---
+The next plot show the accuracy from two experiments. In both the model is UNet with the transposed convolutions for upsampling but in the second experiment we add data augmentation for the training dataset.
 
 ![acctransvsda](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/acctransvsda.png)
 
-There really is no noticeable improvement after adding this transformations. We expected it also in the test results, but we did not get there an improvement either:
+There really is no noticeable improvement after adding this transformations. We expected it also in the test results since they are unseen samples by the model, but we did not get there an improvement either:
 
 | Configuration| Accuracy | mIoU
 |--|--| --|
@@ -421,28 +412,31 @@ There really is no noticeable improvement after adding this transformations. We 
 
 ---
 
-Our last experiment was changing the learning rate of the optimizer. We did it on several configurations, both UNet and Deeplabv3 and both Adam and SGD, and here we can notice a real change.
+Our of our last experiments was changing the learning rate of the optimizer. We did it on several configurations, both UNet and Deeplabv3 and both Adam and SGD, and here we can notice a real change. The "standard" learning rate is 0.001 and gives a much smoother curve for loss and also metrics. In every experiment used 0.1 as the learning rate all curves became unpredictable.
 
 ![miou01vs0001](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/miou01vs0001.png)
 
 
 ## Conclusion
 
-(we should decide what out conclusions for the project are and insert here)
+What drove us during the whole process of experimentation was the evidence that came out. What we searched over and over through reading and proposals was improvement. But unfortunately we didn't find much, at least in the amount we expected. We did expect to see self-evident results as we have been seeing throughout the course in the labs and in the ML books, but maybe we had a stroke of reality.
+The strategy of building has been incremental. From a small model performing good to bigger models performing better. Our best configuration has succesively changed as we added well known techniques and even though they haven't cast astonishing results we have trusted the evidence. This is the nature of science and engineering.
 
-What drove us during the whole process of experimentation was the evidence that came out. What we searched over and over through proposals was improvement. But unfortunately we didn't find much, at least in the amount we expected. We did expect to see self-evident results as we have been seeing throught the course in the labs and in the ML books, but maybe we had a stroke of reality. This is the nature of science and engineering.
+We have become familiar with the elements that comprise every phase of a DL problem. From choosing the dataset that best fitted our needs to adding cloud layers to images. Coding a model and its environment in such a comprehensive and powerful library as Pytorch has been tough at times but easy overall. It is a sure shot to rely on all the classes and methods that the library offers, and we have only used a tiny part of it.
 
-![Linear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/linear.gif)
-![Bilinear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/bilinear.gif)
+Tensorboard has become our closest allie. Being able to follow the experiment in real time is essential to contrast executions and take decisions. Scalars, images and best epochs are truly fundamental resources to have the information gathered.
 
+It has been our first dive into a self-driven deep learning project and we have found it challenging. Sure thing we will move on to power up this model with the pending tasks and explore other DL problems.
 
+| Linear | Bilinear|
+|--|--|
+|![Linear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/linear.gif) | ![Bilinear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/bilinear.gif)|
 
 
 ## Future Work
 
- - Driveable Zone Segmentation
- - Pruning
- - Focal Loss
+In the initial list of goals we included optimistically other tasks that unfortunately we haven't been able to complete in time. One of them is perform transfer learning to detect in other dataset (Berkeley DeepDrive) the driveable zone with our best configuration.
+Focal loss was also amongst them but we invested a lot of time running all the main experiments and did not manage to add it. At last, the pruning of our model has come out recurrently in meetings as a good solution to perform in production environments but it is not an easy technique to implement and with the little time we had left we had to put it apart.
 
 ## References
 [1]: Olaf Ronneberger, Philipp Fischer, Thomas Brox. "U-Net: Convolutional Networks for Biomedical Image Segmentation". CVPR, 2015. https://arxiv.org/abs/1505.04597

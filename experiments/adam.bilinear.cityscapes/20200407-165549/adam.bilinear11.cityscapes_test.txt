@@ -1,0 +1,29 @@
+adam, bilinear, cityscapes, runs/adam.bilinear.cityscapes/20200407-165549/, best, n, n
+set adam optimizer
+
+Dataset test images: 250
+Test set: Average loss: 0.2797, Mean accuracy: 78.50%, mIoU: 0.42%
+IoU per class
+Classes	 Values
+-------   ------
+0	 0.84
+1	 0.59
+2	 0.77
+3	 0.09
+4	 0.24
+5	 0.43
+6	 0.34
+7	 0.44
+8	 0.83
+9	 0.25
+10	 0.81
+11	 0.54
+12	 0.21
+13	 0.64
+14	 0.15
+15	 0.24
+16	 0.07
+17	 0.10
+18	 0.40
+
+
