@@ -4,9 +4,11 @@
 ## Repository Structure
 
 The repository is structured as follows:
+ - aux - folder containing two auxiliar tools for working with the dataset: creating csv files for loading the images in the dataset and getting stats for class imbalance.
  - Figures - folder containing project images.
  - Dataset.py - python file containing the dataset class.
  - Train.py - python file containing the train class.
+ - Test.py - python file used for doing only the Test step.
  - Unet.py - python file containing the Unet class.
  - UnetModes.py - python file containing extra Unet modes.
  - metrics.py - python file containing metric calculators.
@@ -42,39 +44,43 @@ The Cityscapes dataset includes a diverse set of street scene image captures fro
 
 ![Cityscapes](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Cityscapes.png)
 
-A custom dataset class capable of loading the images and targets from the Cityscapes dataset was created. The following functions where included,
+A custom dataset class capable of loading the images and targets from any dataset was created. Thus, in order to increase the flexibility of the network, a [Split_Url_Generator](https://github.com/it6aidl/outdoorsegmentation/blob/master/aux/Split_Url_Generator.py) was created to produce a .csv file containing the URLS linking the dataset images and targets for Train, Val and test. This way, this Dataset class can be reused for any other dataset, just generating new .csv files for the new dataset.
+
+The following functions where included,
 
 -   init( ) - initializes dataset object.
 -   len( ) - returns dataset size.
 -   getitem( ) - loads and transforms image/target.
 
-The loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. 
+This Dataset class is also prepared to apply different kind of transformations for data augmentation. These transformations can be applied only to the images or to both the image and the target, controlling that the random transformations are applied at the same time. In addition, this class includes the weather transformation used for ensure the model is prepared to work in any climatological conditions.  
+
+By default, the loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. This resizing has been done due to reduce training resources required.
 
 A snippet of the transformation code and data loaders is presented below,
 
-![Transformation Code](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Transform%20Code.png)
+'# Creamos los datasets y dataloaders
+  train_dataset = MyDataset(version=ds_version, split='train', joint_transform=joint_transforms, img_transform=img_transforms, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'])
+  train_loader = utils.data.DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=4)
 
-In order to increase the flexibility of the network, a "Split_Generator" was created to produce a .csv file containing the URLS linking the dataset images and targets. The dataset class uses the .csv to locate the data in preparation for training. The following number of images and targets where used for each split:
+  val_dataset = MyDataset(version=ds_version, split='val', joint_transform=joint_transforms_vt, img_transform=img_transforms_vt, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'], add_weather= weather == 'y')
+  val_loader = utils.data.DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=4)
+
+  test_dataset = MyDataset(version=ds_version, split='test', joint_transform=joint_transforms_vt, img_transform=img_transforms_vt, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'], add_weather= weather == 'y')
+  test_loader = utils.data.DataLoader(test_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=4)'
+
+
+ The following number of images and targets where used for each split:
 
 -   Test: 250
-    
+
 -   Validation: 250
-    
--   Train: 1600
-    
 
-  
-As suggested by the Cityscapes documentation, classes with a label id of 255 were emitted, resulting in a total of 19 distinct classes: Road, Sidewalk, Building, Wall, Fence, Pole, Traffic Light, Traffic Sign, Vegetation, Terrain, Sky, Person, Rider, Car, Truck, Bus, Train, Motorcycle, and Bicycle.
-    
-A set of functions were created in the dataset class in order to calculate the statistics of the train and validation splits. The pixel accuracy,
+-   Train: 2952
 
-![Pixel Accuracy Formula](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Accuracy%20formula.png)
 
-intersection over union,
+As suggested by the Cityscapes documentation, classes with a label id of 255 were emitted, resulting in a total of 19 distinct classes: Road, Sidewalk, Building, Wall, Fence, Pole, Traffic Light, Traffic Sign, Vegetation, Terrain, Sky, Person, Rider, Car, Truck, Bus, Train, Motorcycle, and Bicycle. In order to know the kind of data we are working with, we created aux functions to calculate the statistics of the train and validation splits. This information was helpful to understand the class imbalance so that we can apply techniques to deal with it that we will explain above.
 
-![IoU Formula](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/IoU%20formula.png)
-
-and mean intersection over union, which averages the IoU along every class, were gathered and used to track the progress throughout the development of the network.
+![Class stats](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Class_Stats.png)
 
 ## Architectures
 ### Network
@@ -82,13 +88,13 @@ The U-net is a fully convolutional network created specifically for computer vis
 
 ![Unet Model Diagram](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Unet.png)
 
-This allows the network to reduce spatial information while increasing feature information on its way down, and reduce feature information while increasing station information on the way up, leading to highly efficient image processing. 
+This allows the network to reduce spatial information while increasing feature information on its way down, and reduce feature information while increasing station information on the way up, leading to highly efficient image processing.
 
 ### Optimizer
 An optimizer is necessary for minimizing the loss function. In this project both the Adaptive Moment Estimation (Adam) and Stochastic Gradient Descent (SGD) optimizers were tested. SGD calculates the gradient descent for each example, reducing batch redundancies, and improving computational efficiency. Adam is a mixture of the SGD and RMSprop optimizers, and offers an adaptive learning rate, increasing the network's flexibility.
 
 ### Concatenation Layer
-Since the U-net downsamples the feature information in the first half of the network, there is a risk of loosing valuable information. To overcome this, we concatenated all the feature maps in the decoding layers with the feature maps from the encoding layers. This assures that any information learned in the ignitions layers will be retained throughout the network. 
+Since the U-net downsamples the feature information in the first half of the network, there is a risk of loosing valuable information. To overcome this, we concatenated all the feature maps in the decoding layers with the feature maps from the encoding layers. This assures that any information learned in the ignitions layers will be retained throughout the network.
 
 ![Concat Layers](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Unet%2BConcat.png)
 
@@ -111,7 +117,7 @@ The first 6 experiments consists of adjusting configurations for the network its
 **Fer: pongo algunas gráficas y tablas y después con Albert&co vemos cual son más significativas **
 
 ### Experiment 1: Linear UNet
-The first experiment was intended to act as a base-line for the all future experiments. It consisted of a linear version (removing the concatenations) of the UNet using Adam optimizer. This lightweight version works for us to see a quick segmentation result that is easy to understand and easy to be improved by adding components to the configuration. On the other hand it gives very little precision to the prediction. The architecture is presented in the figure #1 and the method to upsample is *torch.nn.Upsample*. 
+The first experiment was intended to act as a base-line for the all future experiments. It consisted of a linear version (removing the concatenations) of the UNet using Adam optimizer. This lightweight version works for us to see a quick segmentation result that is easy to understand and easy to be improved by adding components to the configuration. On the other hand it gives very little precision to the prediction. The architecture is presented in the figure #1 and the method to upsample is *torch.nn.Upsample*.
 
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamlinearloss.png)
@@ -158,8 +164,8 @@ Weights were added to the loss using the inverted frequency. Using the informati
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransdainvloss.png)
 
 ### Experiment 6: Weather Augmentation
-In order for the network to prepare for varying road scenarios, in this experiment, it was trained while running the weather augmentation online to generate rain and snow. 
-After running the data augmentation experiment and even though not having valuable results, we decided to include some realistic data augmentation. In our case, driving scenario, would be very helpful to add circumstances that drivers find on the daily. Of course, this should help the model to generalize better in exchange of a decreasing validation accuracy. 
+In order for the network to prepare for varying road scenarios, in this experiment, it was trained while running the weather augmentation online to generate rain and snow.
+After running the data augmentation experiment and even though not having valuable results, we decided to include some realistic data augmentation. In our case, driving scenario, would be very helpful to add circumstances that drivers find on the daily. Of course, this should help the model to generalize better in exchange of a decreasing validation accuracy.
 The photos were added a layer of one of these elements (rain, snow, clouds, fog) *using python library imgaug*.
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransweloss.png)
@@ -191,7 +197,7 @@ Evaluating and comparing the experiments is a nuclear part of the scientific wor
 
 #### Accuracy
 The main metric we used to evaluate the experiments if the accuracy of the model configuration. The model prediction accuracy  is calculated dividing the number of encerted pixels by the number of total pixels. However, there is a class that we are ignoring throughout the experiments and does not compute for the accuracy.
-Next we show the accuracy comparison: 
+Next we show the accuracy comparison:
 
 *(mpl accuracy graph comparing valuable experiments)*
 
@@ -222,19 +228,19 @@ The other metric that illuminated our grievous path through the fathomless darkn
 |  |  | Bilinear 3x3/1||83.13 |41.7
 |  |  | Bilinear 1x1|| 83.46 | 43.23
 |  |  | Transpose| |83.64|44.01  
-| SGD (0.001) | | Transpose|| 80.89|34.26 
+| SGD (0.001) | | Transpose|| 80.89|34.26
 | Adam (0.001) |  | Transpose|DA | 82.77| 41.33
 |  |  | Transpose|DA & IF |75.14|35.09
-|  |  | Transpose|Weather DA |81.28|38.41 
-|  | Deeplabv3 | | |82.32|39.47 
-| SGD (0.001) | Deeplabv3 | | | | 
-| SGD (0.1) | Deeplabv3 | | |83.99|46.64 
-|  | | |Weather DA | | 
+|  |  | Transpose|Weather DA |81.28|38.41
+|  | Deeplabv3 | | |82.32|39.47
+| SGD (0.001) | Deeplabv3 | | | |
+| SGD (0.1) | Deeplabv3 | | |83.99|46.64
+|  | | |Weather DA | |
 
 
 #### Test results
 
-The previous metrics were taken in the validation phase of our training. Concluding the experiment we test the model configuration with the test dataset. The results in this phase give us an overall understanding of the performance. 
+The previous metrics were taken in the validation phase of our training. Concluding the experiment we test the model configuration with the test dataset. The results in this phase give us an overall understanding of the performance.
 *(excel table of the results)*
 
 | Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
@@ -245,12 +251,12 @@ The previous metrics were taken in the validation phase of our training. Conclud
 |  |  | Transpose| | 78.3| 43
 | SGD (0.001) | | Transpose| |75.3 | 31
 | Adam (0.001) |  | Transpose|DA |77.3 | 39
-|  |  | Transpose|DA & IF |70.16 |34 
+|  |  | Transpose|DA & IF |70.16 |34
 |  |  | Transpose|Weather DA |75.72 | 35
 |  | Deeplabv3 | | |76.86 | 39
-| SGD (0.001) | Deeplabv3 | | | | 
+| SGD (0.001) | Deeplabv3 | | | |
 | SGD (0.1) | Deeplabv3 | | |78.73| 46
-|  | | |Weather DA | | 
+|  | | |Weather DA | |
 
 
 ### Other comparisons
@@ -271,7 +277,7 @@ In the next figure we can see that after a similar start in the first 15 epochs,
 
 There really is no noticeable improvement after adding this transformations. We expected it also in the test results, but we did not get there an improvement either:
 
-| Configuration| Accuracy | mIoU 
+| Configuration| Accuracy | mIoU
 |--|--| --|
 | Normal |78.3  |43
 | Data augmentation | 77.3  |39
