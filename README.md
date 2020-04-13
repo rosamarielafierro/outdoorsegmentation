@@ -6,8 +6,10 @@
 
 The repository is structured as follows:
  - Figures - folder containing project images.
+ - Toolbox - folder containing two auxiliar tools for working with the dataset: creating csv files for loading the images in the dataset and getting stats for class imbalance.
  - Dataset.py - python file containing the dataset class.
  - Train.py - python file containing the train class.
+ - Test.py - python file used for doing only the Test step.
  - Unet.py - python file containing the Unet class.
  - UnetModes.py - python file containing extra Unet modes.
  - metrics.py - python file containing metric calculators.
@@ -43,39 +45,40 @@ The Cityscapes dataset includes a diverse set of street scene image captures fro
 
 ![Cityscapes](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Cityscapes.png)
 
-A custom dataset class capable of loading the images and targets from the Cityscapes dataset was created. The following functions where included,
+A custom dataset class capable of loading the images and targets from any dataset was created. Thus, in order to increase the flexibility of the network, a [Split_Url_Generator](https://github.com/it6aidl/outdoorsegmentation/blob/master/aux/Split_Url_Generator.py) was created to produce a .csv file containing the URLS linking the dataset images and targets for Train, Val and test. This way, this Dataset class can be reused for any other dataset, just generating new .csv files for the new dataset.
+
+The following functions where included,
 
 -   init( ) - initializes dataset object.
 -   len( ) - returns dataset size.
 -   getitem( ) - loads and transforms image/target.
 
-The loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. 
+This Dataset class is also prepared to apply different kind of transformations for data augmentation. These transformations can be applied only to the images or to both the image and the target, controlling that the random transformations are applied at the same time. In addition, this class includes the weather transformation used for ensure the model is prepared to work in any climatological conditions using [imgaug](https://imgaug.readthedocs.io/en/latest/).  
+
+By default, the loaded images are resized to 256x512 and converted to tensors during the transformation. The loaded targets are resized to 256x512, with the interpolation parameter set to 0. This resizing has been done for reducing the training resources required.
 
 A snippet of the transformation code and data loaders is presented below,
 
-![Transformation Code](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Transform%20Code.png)
+~~~
+  # Creamos los datasets y dataloaders
+  train_dataset = MyDataset(version=ds_version, split='train', joint_transform=joint_transforms, img_transform=img_transforms, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'])
+  train_loader = utils.data.DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=4)
 
-In order to increase the flexibility of the network, a "Split_Generator" was created to produce a .csv file containing the URLS linking the dataset images and targets. The dataset class uses the .csv to locate the data in preparation for training. The following number of images and targets where used for each split:
+  val_dataset = MyDataset(version=ds_version, split='val', joint_transform=joint_transforms_vt, img_transform=img_transforms_vt, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'], add_weather= weather == 'y')
+  val_loader = utils.data.DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=4)
 
+  test_dataset = MyDataset(version=ds_version, split='test', joint_transform=joint_transforms_vt, img_transform=img_transforms_vt, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'], add_weather= weather == 'y')
+  test_loader = utils.data.DataLoader(test_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=4)
+~~~
+
+In particular, we worked with CityScapes Fine annotations and 8-bit images. The following number of images and targets where used for each split:
 -   Test: 250
-    
 -   Validation: 250
-    
--   Train: 1600
-    
+-   Train: 2952
 
-  
-As suggested by the Cityscapes documentation, classes with a label id of 255 were emitted, resulting in a total of 19 distinct classes: Road, Sidewalk, Building, Wall, Fence, Pole, Traffic Light, Traffic Sign, Vegetation, Terrain, Sky, Person, Rider, Car, Truck, Bus, Train, Motorcycle, and Bicycle.
-    
-A set of functions were created in the dataset class in order to calculate the statistics of the train and validation splits. The pixel accuracy,
+As suggested by the Cityscapes documentation, classes with a label id of 255 were emitted, resulting in a total of 19 distinct classes: Road, Sidewalk, Building, Wall, Fence, Pole, Traffic Light, Traffic Sign, Vegetation, Terrain, Sky, Person, Rider, Car, Truck, Bus, Train, Motorcycle, and Bicycle. In order to know the kind of data we are working with, we created aux functions to calculate the [statistics](https://github.com/it6aidl/outdoorsegmentation/blob/master/aux/dataloader_stats.py) of the train and validation splits. This information was helpful to understand the class imbalance so that we can apply techniques to deal with it that we will explain above.
 
-![Pixel Accuracy Formula](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Accuracy%20formula.png)
-
-intersection over union,
-
-![IoU Formula](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/IoU%20formula.png)
-
-and mean intersection over union, which averages the IoU along every class, were gathered and used to track the progress throughout the development of the network.
+![Class stats](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Class_Stats.png)
 
 ## Architectures
 ### Network
@@ -83,13 +86,13 @@ The U-net is a fully convolutional network created specifically for computer vis
 
 ![Unet Model Diagram](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Unet.png)
 
-This allows the network to reduce spatial information while increasing feature information on its way down, and reduce feature information while increasing station information on the way up, leading to highly efficient image processing. 
+This allows the network to reduce spatial information while increasing feature information on its way down, and reduce feature information while increasing station information on the way up, leading to highly efficient image processing.
 
 ### Optimizer
 An optimizer is necessary for minimizing the loss function. In this project both the Adaptive Moment Estimation (Adam) and Stochastic Gradient Descent (SGD) optimizers were tested. SGD calculates the gradient descent for each example, reducing batch redundancies, and improving computational efficiency. Adam is a mixture of the SGD and RMSprop optimizers, and offers an adaptive learning rate, increasing the network's flexibility.
 
 ### Concatenation Layer
-Since the U-net downsamples the feature information in the first half of the network, there is a risk of loosing valuable information. To overcome this, we concatenated all the feature maps in the decoding layers with the feature maps from the encoding layers. This assures that any information learned in the ignitions layers will be retained throughout the network. 
+Since the U-net downsamples the feature information in the first half of the network, there is a risk of loosing valuable information. To overcome this, we concatenated all the feature maps in the decoding layers with the feature maps from the encoding layers. This assures that any information learned in the ignitions layers will be retained throughout the network.
 
 ![Concat Layers](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Unet%2BConcat.png)
 
@@ -105,6 +108,11 @@ where f(x,y) is the unknown function, in our case pixel intensity, and the four 
 ### Transposed Convolutions
 To improve the quality and efficiency of the upsampling, the bi-linear interpolation was replaced by transposed convolutions. These convolutions make use of learneable parameters to enable the network to “learn” how to best transform each feature map on its own.
 
+### DeepLabv3
+As a way to test a different approach, and trying to improve the results, we tested a different model: DeepLabv3. Here, we picked the version already existing and pretrained in Torchvision. This architecture review how atrous convolutions are applied to extract dense features for semantic segmentation and how to use a combination of them in parallel under the concept of Atrous Spatial Pyramid Pooling.  
+
+![Deeplabv3](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/deeplabv3.png)
+
 ## Results
 
 Throughout the process of building a strong model, multiple experiments were conducted in order to track progress. We stuck with the configuration that gave us better results until the moment and build on top of it.
@@ -119,6 +127,7 @@ As an optimizer we chose Adam because it needs no additional tuning or adjust hy
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamlinearloss.png)
 
 
+<<<<<<< HEAD
 ### Experiment 2: UNet
 For the second experiments, we improved the network to embrace the concatenations defined in the canonical net. After achieving a not so bad accuracy result of 75%, we moved on to reproduce the full UNet. This of course turned into computational and practical adjustments such as reducing the batch size and we had to wait longer for the experiment to give results.
 The UNet as it was created in [the paper](https://arxiv.org/abs/1505.04597) will give us more precision in the predictions since it adds every phase result of the encoder to the decoder to produce the output. Increase of prediction is really evident.
@@ -126,19 +135,32 @@ The UNet as it was created in [the paper](https://arxiv.org/abs/1505.04597) will
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adambilinearloss.png)
 
+The results, apart from the quantitative side, have shown a real qualitative effect in the sharpness of the predictions, as can be seen in the following comparison. In the left hand side we can see the predictions from the model with the concatenations whereas in the right hand side we can see the results of the architecture without these conections.
+
+![Effect of concatenations](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/effectofconcatenation.png)
+
 
 #### Transposed convolutions:  Kernel 3 Padding 1 vs Transpose Kernel 1
-*Explicar porqué hemos hecho esto*
-As earlier said, we used *torch.nn.UpSample* as the component to upsample the encoded features. There are several other methods to perform the upsampling and we chose the Transposed convolutions. This generated new feature maps double sized in the decoder phases so we end up having the same output size. In practical, the accuracy rised a bit but it was not visible looking at the predictions.
-We implemented two variants of the transposed: kernel 3 with pad 1 and kernel 1. The latter gave us better results by small margin. For the next experiments we would choose transpose kernel 1 to act as our base configuration.
 
+As earlier said, we used *torch.nn.UpSample* as the component to upsample the encoded features. There are several other methods to perform the upsampling and we chose the Transposed convolutions. This generated new feature maps double sized in the decoder phases so we end up having the same output size. In practical, the accuracy rised a bit but it was not visible looking at the predictions.
+In the original experiment, we included the Kernel size 1 in the last step as presented in the original paper. However, we wanted to test if using a wider kernel (3x3), it can keep better the spatial information for the feature extraction than the orginal 1x1 one.
+
+
+
+~~~
     self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
                                 nn.Conv2d(in_channels, out_channels, kernel_size=3, padding= 1))
   
     self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
-                                nn.Conv2d(in_channels, out_channels, kernel_size=1))
-![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransloss.png)
+                              nn.Conv2d(in_channels, out_channels, kernel_size=1))
+~~~
 
+*FALTA EL RESULTADO CON EL KERNEL 3*
+
+#### Transposed convolutions
+The following experiment we try, was changing the bilinear interpolations in the upsampling for transposed convolutions, as commented above. The results are shown in the following graph.
+
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransloss.png)
 
 ### Experiment 3: Change optimizer
 
@@ -157,13 +179,21 @@ Training the network with this technique makes it generalize better on new sampl
 
 ### Experiment 5: Inverted Weight
 Weights were added to the loss using the inverted frequency. Using the information obtained from train split, the inverted frequency was calculated for each class.
-**Creo que alberto puede explicar mejor esta parte**
+
+
+Based on the number of pixels for each class calculated above:
+~~~
+Number of pixels per class (train):
+[127414939, 21058643, 79041999, 2269832, 3038496, 4244760, 720425, 1911074, 55121339, 4008424, 13948699, 4204816, 465832, 24210293, 925225, 813190, 805591, 341018, 1430722, 43963883]
+~~~
+
+the inverted frequency is calculated as the inversion of the normalized number of pixels (normalizing by the total number of pixels). This is used to compensate the imbalance of the classes, as shown in the figure above.
+
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransdainvloss.png)
 
 ### Experiment 6: Weather Augmentation
-
-In order for the network to prepare for varying road scenarios, in this experiment, it was trained while running the weather augmentation online to generate rain and snow. 
-After running the data augmentation experiment and even though not having valuable results, we decided to include some realistic data augmentation. In our case, driving scenario, would be very helpful to add circumstances that drivers find on the daily. Of course, this should help the model to generalize better in exchange of a decreasing validation accuracy. 
+In order for the network to prepare for varying road scenarios, in this experiment, it was trained while running the weather augmentation online to generate rain and snow.
+After running the data augmentation experiment and even though not having valuable results, we decided to include some realistic data augmentation. In our case, driving scenario, would be very helpful to add circumstances that drivers find on the daily. Of course, this should help the model to generalize better in exchange of a decreasing validation accuracy.
 The photos were added a layer of one of these elements (rain, snow, clouds, fog) *using python library imgaug*.
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransweloss.png)
@@ -199,6 +229,7 @@ As the last experiment, we added the same weather data augmentation we performed
 Evaluating and comparing the experiments is a nuclear part of the scientific work and opens the path to adjust parameters and propose changes. For this project we defined several metrics to compare models and trainings
 
 #### Accuracy
+
 The main metric we used to evaluate the experiments if the accuracy of the model configuration. The model prediction accuracy is calculated dividing the number of encerted pixels by the number of total pixels. However, there is a class that we are ignoring throughout the experiments and does not compute for the accuracy. This class represents objects in the images that are not useful for our purposes (thrash cans and other street objects)
 Next we show the accuracy comparison: 
 
@@ -230,9 +261,9 @@ The highest mIoU is reached by deeplabv3 with a learning rate of 0.1 but at some
 | Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
 | Adam (0.001) |  UNet| Linear||82.25 | 40.1
-|  |  | Bilinear ||83.13 |41.7
-|  |  | Transpose 3x3/1|| 83.46 | 43.23
-|  |  | Transpose 1x1| |83.64|44.01  
+|  |  | Bilinear 3x3/1||83.13 |41.7
+|  |  | Bilinear 1x1|| 83.46 | 43.23
+|  |  | Transpose| |83.64|44.01  
 | SGD (0.001) | | Transpose|| 80.89|34.26 
 | Adam (0.001) |  | Transpose|DA | 82.77| 41.33
 |  |  | Transpose|DA & IF |75.14|35.09
@@ -243,9 +274,10 @@ The highest mIoU is reached by deeplabv3 with a learning rate of 0.1 but at some
 |  | | |Weather DA | 66.32| 17
 
 
+
 #### Test results
 
-The previous metrics were taken in the validation phase of our training. Concluding the experiment we test the model configuration with the test dataset. The results in this phase give us an overall understanding of the performance. 
+The previous metrics were taken in the validation phase of our training. Concluding the experiment we test the model configuration with the test dataset. The results in this phase give us an overall understanding of the performance.
 *(excel table of the results)*
 
 | Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
@@ -256,7 +288,7 @@ The previous metrics were taken in the validation phase of our training. Conclud
 |  |  | Transpose 1x1| | 78.28| 43
 | SGD (0.001) | | Transpose| |75.3 | 31
 | Adam (0.001) |  | Transpose|DA |77.3 | 39
-|  |  | Transpose|DA & IF |70.16 |34 
+|  |  | Transpose|DA & IF |70.16 |34
 |  |  | Transpose|Weather DA |75.72 | 35
 |  | Deeplabv3 | | |76.86 | 39
 | SGD (0.001) | Deeplabv3 || |76.88|41
@@ -282,7 +314,7 @@ In the next figure we can see that after a similar start in the first 15 epochs,
 
 There really is no noticeable improvement after adding this transformations. We expected it also in the test results, but we did not get there an improvement either:
 
-| Configuration| Accuracy | mIoU 
+| Configuration| Accuracy | mIoU
 |--|--| --|
 | Normal |78.3  |43
 | Data augmentation | 77.3  |39
@@ -314,3 +346,5 @@ What drove us during the whole process of experimentation was the evidence that 
 
 ## References
 [1]: Olaf Ronneberger, Philipp Fischer, Thomas Brox. "U-Net: Convolutional Networks for Biomedical Image Segmentation". CVPR, 2015. https://arxiv.org/abs/1505.04597
+[2]: imgaug library https://imgaug.readthedocs.io/en/latest/
+[3]: Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam. "Rethinking Atrous Convolution for Semantic Image Segmentation". CVPR, 2017. https://arxiv.org/abs/1706.05587

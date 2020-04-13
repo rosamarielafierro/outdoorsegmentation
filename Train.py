@@ -45,8 +45,6 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
               'batch_size': 10,
               'num_classes': 19,
               'start_features':32,
-              #'log_interval':10,
-              #'iou_threshold': 0.3,
               'adam_learning_rate': 1E-3,
               'adam_aux_learning_rate': 5E-4,
               'adam_weight_decay': 1E-4,
@@ -62,49 +60,40 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
     params['device'] = torch.device("cuda") if torch.cuda.is_available() else 'cpu'
     da = 'da.' if data_augmentation == 'y' else ''
     inv = 'inv.' if inverted_freq == 'y' else ''
-    we = 'we' if weather == 'y'  else '' 
+    we = 'we' if weather == 'y'  else ''
     experiment_id =  opt + '.' + model_version + '.' + ds_version + "."+ da  + inv + we
 
-    # Creamos las transformaciones para las imagenes y targets
-    """
-    tensor_transform = torchvision.transforms.Compose([
-        torchvision.transforms.Resize(size=(256, 512), interpolation=0),
-        torchvision.transforms.ToTensor()
-    ])
-    target_transform = torchvision.transforms.Compose([
-        torchvision.transforms.Resize(size=(256, 512), interpolation=0)
-    ])
-    """
+    #We include the set of parameters we are working with in this experiment
     print(params)
+    # Creamos las transformaciones para las imagenes y targets
     #Creamos las listas para las transformaciones
     joint_transformations, joint_transformations_vt, img_transformations, img_transformations_vt = [], [], [], []
-    
+
     #Añadimos el Resize
     joint_transformations.append(aux.Resize(256,512))
     joint_transformations_vt.append(aux.Resize(256,512))
 
-    #En caso de Data Augmentation, se añade un Random Vertical Flip y el ajuste de parametros de imagen
+    #En caso de Data Augmentation, se añade un Random Horizontal Flip y el ajuste de parametros de imagen
     if data_augmentation == "y":
         print('set Data Augmentation\n')
         joint_transformations.append(aux.RandomHorizontalFlip())
         img_transformations.append(torchvision.transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1))
-    
+
     if weather == 'y':
         print('set weather\n')
-        img_transformations.append(aux.Weather())
-        # La transformacion online para VT la haremos en el Dataset
-    
-    #añadimos la transformacion final para tensor en las img y normalizamos
+        img_transformations.append(aux.Weather()) # La transformacion online para VT la haremos en el Dataset
+
+    #añadimos la transformacion final para tensor en las img
     img_transformations.append(torchvision.transforms.ToTensor())
     img_transformations_vt.append(torchvision.transforms.ToTensor())
-    
+
     #In the case of DeepLabv3, we apply the recommended normalization
     if model_version == 'deeplab':
         mean = [0.485, 0.456, 0.406]
         std = [0.229, 0.224, 0.225]
         img_transformations.append(torchvision.transforms.Normalize(mean, std))
         img_transformations_vt.append(torchvision.transforms.Normalize(mean, std))
-    
+
     #Aplicamos la transformacion conjunta sobre img y target
     joint_transforms = aux.JointCompose(joint_transformations)
     joint_transforms_vt = aux.JointCompose(joint_transformations_vt)
@@ -112,24 +101,7 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
     #Aplicamos solo la transformacion sobre img
     img_transforms = torchvision.transforms.Compose(img_transformations)
     img_transforms_vt = torchvision.transforms.Compose(img_transformations_vt)
-       
-    """
-    transformations, transformations_target = [], []
-    transformations.append(torchvision.transforms.Resize(size=(256, 512),interpolation=0))
-    transformations_target.append(torchvision.transforms.Resize(size=(256, 512),interpolation=0))
 
-    if data_augmentation == "y":
-        transformations.append(torchvision.transforms.RandomVerticalFlip(p=0.5))
-        transformations.append(torchvision.transforms.ColorJitter(brightness=3))
-        transformations_target.append(torchvision.transforms.RandomVerticalFlip(p=0.5))
-
-    #añadimos la transformacion final para tensor
-    transformations.append(torchvision.transforms.ToTensor())
-
-    #Aplicamos la transformacion sobre target
-    tensor_transform = torchvision.transforms.Compose(transformations)
-    target_transform = torchvision.transforms.Compose(transformations_target)
-    """
     #Definimos temporizadores
     #Arrancamos el temporizador
     start = torch.cuda.Event(enable_timing=True)
@@ -137,7 +109,7 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
     start_total = torch.cuda.Event(enable_timing=True)
     end_total = torch.cuda.Event(enable_timing=True)
 
-    
+
     # Creamos los datasets y dataloaders
     train_dataset = MyDataset(version=ds_version, split='train', joint_transform=joint_transforms, img_transform=img_transforms, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'])
     train_loader = utils.data.DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=4)
@@ -147,18 +119,6 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
 
     test_dataset = MyDataset(version=ds_version, split='test', joint_transform=joint_transforms_vt, img_transform=img_transforms_vt, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'], add_weather= weather == 'y')
     test_loader = utils.data.DataLoader(test_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=4)
-    
-    
-    """
-    train_dataset = MyDataset(version=ds_version, split='train', transform=tensor_transform, target_transform=target_transform, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'])
-    train_loader = utils.data.DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True, num_workers = 4)
-
-    val_dataset = MyDataset(version=ds_version, split='val', transform=tensor_transform, target_transform=target_transform, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'])
-    val_loader = utils.data.DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers = 4)
-
-    test_dataset = MyDataset(version=ds_version, split='test', transform=tensor_transform, target_transform=target_transform, url_csv_file=params['dataset_url'], file_suffix=params['file_suffix'])
-    test_loader = utils.data.DataLoader(test_dataset, batch_size=params['batch_size'], shuffle=False, num_workers = 4)
-    """
 
     def train_one_epoch(train_loader, net, optimizer, criterion, hparams):
 
@@ -180,7 +140,7 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
 
             # Arrancamos temporizador para inferencia
             start.record()
-            
+
             if model_version == 'deeplab':
                 output = net(img)['out']
             else:
@@ -247,7 +207,7 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
         mIoU_desc = metrics.miou_to_string(train_iou)
         return train_loss, train_accs, mIoU, mIoU_desc
 
-        
+
     def val_one_epoch(val_loader, net):
 
         net.eval()
@@ -260,18 +220,12 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
         with torch.no_grad():
             for batch_index, (img, target) in enumerate(val_loader):
                 img, target = img.to(device), target.to(device)
-                """
-                img = img[0].cpu()
-                transPIL = transforms.ToPILImage()
-                imggg = transPIL(img)
-                imggg.save("vall.png")
-                aux.show_image(imggg)
-                """
+
                 if model_version == 'deeplab':
                     output = net(img)['out']
                 else:
                     output = net(img)
-                
+                    
                 if batch_index == 0:
                       first_pred = output
                 
@@ -305,7 +259,7 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
         mIoU_desc = metrics.miou_to_string(val_iou)
         return val_loss, val_acc, mIoU, mIoU_desc, first_pred
 
-    
+
     def test_model(test_loader, net):
 
         net.eval()
@@ -317,23 +271,23 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
         with torch.no_grad():
             for batch_index, (img, target) in enumerate(test_loader):
                 img, target = img.to(device), target.to(device)
-                
+
                 if model_version == 'deeplab':
                     output = net(img)['out']
                 else:
                     output = net(img)
-                
+
                 target = target.long()
                 loss = criterion(output, target).item()
                 test_loss += loss
-                
+
                 pred = aux.get_predicted_image(output)
-                
-                output, target, pred = output.detach().cpu(), target.detach().cpu(), pred.detach().cpu()                
+
+                output, target, pred = output.detach().cpu(), target.detach().cpu(), pred.detach().cpu()
                 # compute number of correct predictions in the batch
                 test_accuracy = metrics.calculate_accuracy(output, target)
                 test_acc += test_accuracy
-                
+
                 iou_inds = metrics.calculate_iou(pred, target)
 
                 for key in iou_inds:
@@ -349,8 +303,8 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
 
         mIoU_desc = metrics.miou_to_string(test_iou)
         return test_loss, test_acc, mIoU, mIoU_desc
-    
-                                 
+
+
     #####################
     ## Build the net here
     if model_version == 'linear':
@@ -380,12 +334,15 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
 
     model.to(params['device'])
     net_params = model.parameters()
-    
+
+
     #Depending on the inverted frequency parameter we apply this parameter as a weight to balance the Loss Function
     if inverted_freq == 'y':
         print('set Inverted Frequency weights \n')
         num_pixels_per_class = [127414939, 21058643, 79041999, 2269832, 3038496, 4244760, 720425, 1911074, 55121339, 4008424, 13948699, 4204816, 465832, 24210293, 925225, 813190, 805591, 341018, 1430722]
-        inverted_weights = [(1/num_pixels) for num_pixels in num_pixels_per_class]
+
+        norm_weights = [(num_pixels/sum(num_pixels_per_class)) for num_pixels in num_pixels_per_class]
+        inverted_weights = [(1/num_pixels) for num_pixels in norm_weights]
         inverted_weights = torch.FloatTensor(inverted_weights).to(params['device'])
         criterion = torch.nn.CrossEntropyLoss(weight=inverted_weights, ignore_index=255)
     else:
@@ -425,21 +382,16 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
             print('Guardamos el modelo en epoch {} ( mIoU {:.2f})'.format(epoch, val_mIoU))
             aux.save_model(model, run_data_folder +'/best')
             aux.write_tensorboard_best_IoU(tb_writer_val, val_mIoU, epoch)
-        #train_losses.append(train_loss)
+
         train_acc_hist.append(train_acc)
-        #val_losses.append(val_loss)
         val_acc_hist.append(val_acc)
-        #mIoU_hist.append(val_mIoU)
 
         mIoU_hist_train.append(train_mIoU)
         mIoU_hist_val.append(val_mIoU)
-        
-        """
-        images_val = images_val.to(params['device'])
-        predicted_output = model(images_val)
-        """
+
 
         aux.write_tensorboard_epoch(tb_writer_train, tb_writer_val,run_data_folder, first_pred[0], epoch, train_loss, train_acc, val_loss, val_acc, train_mIoU, val_mIoU, train_mAP, val_mAP)
+
     aux.save_model(model, run_data_folder +'/last')
     print('Fin del entrenamiento\n')
 
@@ -455,30 +407,6 @@ def main(opt, model_version, ds_version, data_augmentation, inverted_freq, weath
     print('Test set: Average loss: {:.4f}, Mean accuracy: {:.2f}%, mIoU: {:.2f}%\n{}\n'.format(test_loss, test_acc, mIoU, mIoU_desc))
 
 
-"""
-Los argumentos son son:
-    ~ Optimizers (-opt)
-        - adam
-        - sgd
-    ~ Model (-net)
-        - full
-        - bilinear
-        - trans
-        - deeplab
-    ~ Dataset (-ds)
-        - cityscapes
-        - it6
-    ~ Data Augmentation (-da)
-        - y
-        - n
-    ~ Inverted Frequency (-invf)
-        - y
-        - n
-    ~ Weather (-weather)
-        - y
-        - n
-    
-"""
 
 if __name__ == '__main__':
 
@@ -493,4 +421,3 @@ if __name__ == '__main__':
     print('{}, {}, {}, {}, {}, {}'.format(args.optimizer, args.network, args.dataset, args.data_augmentation, args.inverted_freq, args.weather))
 
     main(opt= args.optimizer, model_version=args.network, ds_version=args.dataset, data_augmentation=args.data_augmentation, inverted_freq=args.inverted_freq, weather=args.weather)
-    
