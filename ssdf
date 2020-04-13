@@ -1,0 +1,176 @@
+[33mcommit 9c02d5842b48e4cda7424a7a521fdb977a2ed506[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Mon Apr 13 14:16:04 2020 +0200
+
+    update readme and loss, metrics figures
+
+[33mcommit a0fbc56e4efc546e55f72c9475bd784ea062b675[m
+Author: amasmor <amasmor@users.noreply.github.com>
+Date:   Mon Apr 13 11:18:22 2020 +0200
+
+    Added reference
+
+[33mcommit 25d748658188c3d72c99398e8a646b8b7bd07e78[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 23:24:46 2020 +0200
+
+    Update README.md
+
+[33mcommit 0907dd4c092db0ea6339918520cb621d4e382708[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 23:11:42 2020 +0200
+
+    Update README.md
+
+[33mcommit ccf854412986139a147a721ac7ada854bf9e3a0a[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 23:10:55 2020 +0200
+
+    Update README.md
+
+[33mcommit 698a4dc6b1bf5b256d138d83011389fe0642fc7e[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 23:05:48 2020 +0200
+
+    Update README.md
+
+[33mcommit 3a174f58a14ecf870382ae477ca84e86ba121d58[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 23:05:10 2020 +0200
+
+    Update README.md
+
+[33mcommit c3b277ff3f58da218c26ccc7b3ac4d645099623f[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 23:04:10 2020 +0200
+
+    sina re-write
+
+[33mcommit 505ae73035c453afb9863ea8960b449f90762a4a[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 23:03:56 2020 +0200
+
+    Delete README.md
+
+[33mcommit c2fbbb28fb1f50b524402be4a5d9c4fb5c7a2f5e[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 23:02:29 2020 +0200
+
+    Add files via upload
+
+[33mcommit cb08e28b6d5ee2067d5b73e1e83ab232867655cd[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 22:59:12 2020 +0200
+
+    sina re-write
+
+[33mcommit 5d9e9ef8e16901ecb0dc9e737f2591e5d4f4e868[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 22:58:08 2020 +0200
+
+    Delete README.md
+
+[33mcommit a0fc8eff0c3a616cb90a83ec502f3fd8e9690d07[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 22:28:23 2020 +0200
+
+    Add files via upload
+    
+    additional readme figures
+
+[33mcommit 44ef21b90b21a39522690347118706f7401a4d05[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 22:27:10 2020 +0200
+
+    Delete Unet - Concat.png
+
+[33mcommit 8e785da12cdfa6674723f36233bc2822243ac421[m
+Author: IT6 Group - AIDL Winter 2019 UPC <62911939+it6aidl@users.noreply.github.com>
+Date:   Sun Apr 12 22:27:01 2020 +0200
+
+    Delete Unet - Basic.png
+
+[33mcommit c70f04eb5a26f2eba382e126fb7ff79e73be2a95[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Sun Apr 12 17:13:43 2020 +0200
+
+    updated loss figures
+
+[33mcommit 57e4354e9e5bb84180f56911b94b991895408251[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Sun Apr 12 14:03:55 2020 +0200
+
+    readme and added loss figures
+
+[33mcommit cdcc156e8333e183ffd69670c2121e0eb97c2373[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Sat Apr 11 12:28:24 2020 +0200
+
+    fallos en readme
+
+[33mcommit 25e030c979a6a69d01dd09119eb7453d8010ea1e[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Sat Apr 11 12:24:04 2020 +0200
+
+    update readme and upload figures
+
+[33mcommit c2c97da06704e64965cd302c3add74ffeb709fe3[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Sat Apr 11 09:08:59 2020 +0200
+
+    update readme
+
+[33mcommit d7141a6f08de82b0901eb35b7dbf692273ef010b[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Sat Apr 11 09:06:47 2020 +0200
+
+    update readme and included figures
+
+[33mcommit 758f841e4eac9cd8f5b94e47978b09e265d18a04[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Fri Apr 10 14:12:00 2020 +0200
+
+    update readme
+
+[33mcommit f41e0730f10b832869da63b9ed61db3ad6419ebf[m
+Merge: 7cc51e0 29faa29
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Fri Apr 10 14:09:56 2020 +0200
+
+    added utils and changed readme
+
+[33mcommit 7cc51e0db9fa5aae1b16ed4dd4606637d7674a7a[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Fri Apr 10 14:07:08 2020 +0200
+
+    added utils and readme
+
+[33mcommit 29faa2950c1d0c26a71f656cdcaf98b384b58370[m
+Author: it6aidl <62911939+it6aidl@users.noreply.github.com>
+Date:   Thu Apr 9 20:23:20 2020 +0200
+
+    Add files via upload
+
+[33mcommit 0a563a910d3071f96e1594f7ebd80b9aa7b2de12[m
+Author: it6aidl <62911939+it6aidl@users.noreply.github.com>
+Date:   Thu Apr 9 20:22:48 2020 +0200
+
+    Delete README.md
+
+[33mcommit 5b5ffbd864cd8d32bd8db88c843bafbec6f2ee77[m
+Author: it6aidl <62911939+it6aidl@users.noreply.github.com>
+Date:   Thu Apr 9 20:13:31 2020 +0200
+
+    Add files via upload
+
+[33mcommit 720d1bd90270098c9d9749c1a3b9daa57525e953[m
+Author: Fernando Tebar <fetema1987@gmail.com>
+Date:   Wed Apr 8 11:09:20 2020 +0200
+
+    initial commit
+
+[33mcommit ebe8a44ad824759099676617e7a0a626572fe6dd[m
+Author: it6aidl <62911939+it6aidl@users.noreply.github.com>
+Date:   Mon Mar 30 23:47:12 2020 +0200
+
+    Initial commit
