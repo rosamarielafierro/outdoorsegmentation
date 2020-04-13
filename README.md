@@ -132,11 +132,11 @@ For the second experiment, we improved the network to embrace the concatenations
 
 The results, apart from the quantitative side, have shown a real qualitative effect in the sharpness of the predictions, as can be seen in the following comparison. In the left hand side we can see the predictions from the model with the concatenations whereas in the right hand side we can see the results of the architecture without these conections.
 
-[Effect of concatenations](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/effectofconcatenation.png)
+![Effect of concatenations](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/effectofconcatenation.png)
 
 
 #### Kernel 3 Padding 1 vs Kernel 1
-In the original experiment, we included the Kernel size 1 in the last step as presented in the original paper. However, we wanted to test if   
+In the original experiment, we included the Kernel size 1 in the last step as presented in the original paper. However, we wanted to test if using a widther   
 
 This way, we modified the last pass this way, using a Kernel 3x3 with padding=1, as a way to
 
