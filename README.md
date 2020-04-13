@@ -440,5 +440,7 @@ Focal loss was also amongst them but we invested a lot of time running all the m
 
 ## References
 [1]: Olaf Ronneberger, Philipp Fischer, Thomas Brox. "U-Net: Convolutional Networks for Biomedical Image Segmentation". CVPR, 2015. https://arxiv.org/abs/1505.04597
+
 [2]: imgaug library https://imgaug.readthedocs.io/en/latest/
+
 [3]: Liang-Chieh Chen, George Papandreou, Florian Schroff, Hartwig Adam. "Rethinking Atrous Convolution for Semantic Image Segmentation". CVPR, 2017. https://arxiv.org/abs/1706.05587
