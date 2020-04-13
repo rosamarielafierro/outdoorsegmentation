@@ -1,6 +1,7 @@
 
 
 
+
 ## Repository Structure
 
 The repository is structured as follows:
@@ -105,32 +106,35 @@ where f(x,y) is the unknown function, in our case pixel intensity, and the four 
 To improve the quality and efficiency of the upsampling, the bi-linear interpolation was replaced by transposed convolutions. These convolutions make use of learneable parameters to enable the network to “learn” how to best transform each feature map on its own.
 
 ## Results
-Throughout the process of advancing the network, multiple experiments were conducted in order to track progress. What drove us during the whole process of experimentation was evidence :eyes:. What we searched over and over was improvement :sunrise_over_mountains:. But we didn't find it :trollface:, at least how we expected. We expected to see results as we have been seeing in the labs and in the ML books, but maybe we had a stroke of reality. This is the nature of science and engineering :smirk:. We stuck with the configuration that gave us better results until the moment and build on top of it.
-The first 6 experiments consists of adjusting configurations for the network itself and adding ML techniques. For the last two experiments we wanted to play a little bit and test the theoretical part we learned in class: we changed the optimizer for our network and an hyperparameter, the learning rate.
 
-**Fer: pongo algunas gráficas y tablas y después con Albert&co vemos cual son más significativas **
+Throughout the process of building a strong model, multiple experiments were conducted in order to track progress. We stuck with the configuration that gave us better results until the moment and build on top of it.
+
 
 ### Experiment 1: Linear UNet
-The first experiment was intended to act as a base-line for the all future experiments. It consisted of a linear version (removing the concatenations) of the UNet using Adam optimizer. This lightweight version works for us to see a quick segmentation result that is easy to understand and easy to be improved by adding components to the configuration. On the other hand it gives very little precision to the prediction. The architecture is presented in the figure #1 and the method to upsample is *torch.nn.Upsample*. 
 
+In the very beginning, we decided to build an easy-to-code, lightweight model that worked for us to see a nice segmentation result easy to understand and easy to be improved by adding components to the configuration. It also gave some hints about the base results we could achieve. 
+It was intended as well to act as a base-line for the all future experiments. It consisted of a linear version (removing the concatenations) of the UNet. Easy as it was, such a model casts very little precision to the prediction. For this implementation, we decoder phase made use of *torch.nn.Upsample* to upsample the encoded features. 
+As an optimizer we chose Adam because it needs no additional tuning or adjust hyperparameters.
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamlinearloss.png)
 
 
-### Experiment 2: Concat UNet
-For the second experiments, we improved the network to embrace the concatenations defined in the canonical net. Also, we implemented another way to upsample the encoded data in the net through Transposed convolutions.
+### Experiment 2: UNet
+For the second experiments, we improved the network to embrace the concatenations defined in the canonical net. After achieving a not so bad accuracy result of 75%, we moved on to reproduce the full UNet. This of course turned into computational and practical adjustments such as reducing the batch size and we had to wait longer for the experiment to give results.
+The UNet as it was created in [the paper](https://arxiv.org/abs/1505.04597) will give us more precision in the predictions since it adds every phase result of the encoder to the decoder to produce the output. Increase of prediction is really evident.
+
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adambilinearloss.png)
 
 
-#### Transpose Kernel 3 Padding 1 vs Transpose Kernel 1
+#### Transposed convolutions:  Kernel 3 Padding 1 vs Transpose Kernel 1
 *Explicar porqué hemos hecho esto*
-
+As earlier said, we used *torch.nn.UpSample* as the component to upsample the encoded features. There are several other methods to perform the upsampling and we chose the Transposed convolutions. This generated new feature maps double sized in the decoder phases so we end up having the same output size. In practical, the accuracy rised a bit but it was not visible looking at the predictions.
+We implemented two variants of the transposed: kernel 3 with pad 1 and kernel 1. The latter gave us better results by small margin. For the next experiments we would choose transpose kernel 1 to act as our base configuration.
 
     self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
                                 nn.Conv2d(in_channels, out_channels, kernel_size=3, padding= 1))
-  ---
-
+  
     self.up = nn.Sequential(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
                                 nn.Conv2d(in_channels, out_channels, kernel_size=1))
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransloss.png)
@@ -138,18 +142,17 @@ For the second experiments, we improved the network to embrace the concatenation
 
 ### Experiment 3: Change optimizer
 
-After running different configurations, we chose the one to perform the rest of the experiments: transposed convolutions UNet. This gave us the better validation results (by a small margin though) than the upsampling version.
-Then, before introducing the ML techniques, we decided to change the optimizer for SGD to see how it performed.
+For our next experiment and before introducing machine learning techniques, we decided to change the optimizer to SGD to see how it performed. Comparing validation results we would keep Adam optimizer 
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/sgdtransloss.png)
 
 
 ### Experiment 4: Data Augmentation
 
-From the beginning of the project we wanted to implement this classic ML technique to boost the model prediction. In spite of this technique be often used to reduce overfitting, we have not suffered such, but we wanted to test our net and see how the affected accuracy in validation and test. The transformations done to the images comprehend random horizontal flips and modifications to brightness, contrast, saturation and hue.
+After stablishing the UNet version and optimizer that gave us better results, we could start experimenting other ML techniques to boost the model prediction. In spite of this technique be often used to reduce overfitting, we have not suffered such, but we wanted to test our net and see how the affected accuracy in validation and test. The transformations done to the images comprehend random horizontal flips and modifications to brightness, contrast, saturation and hue.
+Training the network with this technique makes it generalize better on new samples but it gave no better results. As a matter of fact, the test results, where we was expecting a change, suffered a decrease in both metrics.
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransdaloss.png)
-
 
 
 ### Experiment 5: Inverted Weight
@@ -158,6 +161,7 @@ Weights were added to the loss using the inverted frequency. Using the informati
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/adamtransdainvloss.png)
 
 ### Experiment 6: Weather Augmentation
+
 In order for the network to prepare for varying road scenarios, in this experiment, it was trained while running the weather augmentation online to generate rain and snow. 
 After running the data augmentation experiment and even though not having valuable results, we decided to include some realistic data augmentation. In our case, driving scenario, would be very helpful to add circumstances that drivers find on the daily. Of course, this should help the model to generalize better in exchange of a decreasing validation accuracy. 
 The photos were added a layer of one of these elements (rain, snow, clouds, fog) *using python library imgaug*.
@@ -172,28 +176,33 @@ Finally, the entire project was run using the pre-w eighted Deep Lab model to co
 
 ### Experiment 8: Change Deeplabv3 optimizer
 
-
+**Creo que alberto puede explicar mejor esta parte**
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/sgddeeplabloss.png)
 
 
 ### Experiment 9: Change learning rate
+
+At this point we hadn't tune the hyperparameters so we decided to explore how this could affect the configuration. We thought it could lead us to a steeper loss and accuracy curve, but, even though the curves were similar, it performed slightly better than the previous version of deeplabv3 using our classic learning rate 0.001. 
 
 ![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/sgd01deeplabloss.png)
 
 
 ### Experiment 10: Add weather data augmentation
 
-** Experimento en marcha 12.04 13:50 **
+As the last experiment, we added the same weather data augmentation we performed on our UNet to deeplabv3. The experiment was very disappointing in the validation phase since accuracy dropped to the lowest, but that's the natural answer to data augmentation. The model will be penalized in the validation dataset but will generalize better for new real world samples.
 
+![Loss graph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/lossfigures/sgd01deeplabweatherloss.png)
+
+---
 ### Metrics
 
 Evaluating and comparing the experiments is a nuclear part of the scientific work and opens the path to adjust parameters and propose changes. For this project we defined several metrics to compare models and trainings
 
 #### Accuracy
-The main metric we used to evaluate the experiments if the accuracy of the model configuration. The model prediction accuracy  is calculated dividing the number of encerted pixels by the number of total pixels. However, there is a class that we are ignoring throughout the experiments and does not compute for the accuracy.
+The main metric we used to evaluate the experiments if the accuracy of the model configuration. The model prediction accuracy is calculated dividing the number of encerted pixels by the number of total pixels. However, there is a class that we are ignoring throughout the experiments and does not compute for the accuracy. This class represents objects in the images that are not useful for our purposes (thrash cans and other street objects)
 Next we show the accuracy comparison: 
 
-*(mpl accuracy graph comparing valuable experiments)*
+![Accuracy validationgraph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/accval.png)
 
 
 #### IoU per class
@@ -209,9 +218,11 @@ As we presented in the dataset statistics, we have a noticeable class imbalance,
 
 #### mIoU
 
-The other metric that illuminated our grievous path through the fathomless darkness of semantic segmentation was the mean Intersection over Union. A mean calculation of every class IoU is used to measure how well is in classificating all the classes.
+The other metric that illuminated our grievous path through the fathomless darkness of semantic segmentation was the mean Intersection over Union. A mean calculation of every class IoU is used to measure how well is the model classificating all the classes.
+The class imbalance penalises the results, since we have several classes with an IoU of almost 0, but the rest of them achieves an acceptable result.
+The highest mIoU is reached by deeplabv3 with a learning rate of 0.1 but at some sudden points it becomes unstable. Then in order are the UNet (bilinear and transpose), linear and the transpose with data augmentation. Some steps lower are the UNet with data augmentation and inverted frequencies and at last the deeplabv3 with weather data augmentation.
 
-*(mIoU graph comparing valuable experiments)*
+![mIoUvalidationgraph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/miouval.png)
 
 
 #### Validation results
@@ -219,17 +230,17 @@ The other metric that illuminated our grievous path through the fathomless darkn
 | Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
 | Adam (0.001) |  UNet| Linear||82.25 | 40.1
-|  |  | Bilinear 3x3/1||83.13 |41.7
-|  |  | Bilinear 1x1|| 83.46 | 43.23
-|  |  | Transpose| |83.64|44.01  
+|  |  | Bilinear ||83.13 |41.7
+|  |  | Transpose 3x3/1|| 83.46 | 43.23
+|  |  | Transpose 1x1| |83.64|44.01  
 | SGD (0.001) | | Transpose|| 80.89|34.26 
 | Adam (0.001) |  | Transpose|DA | 82.77| 41.33
 |  |  | Transpose|DA & IF |75.14|35.09
 |  |  | Transpose|Weather DA |81.28|38.41 
 |  | Deeplabv3 | | |82.32|39.47 
-| SGD (0.001) | Deeplabv3 | | | | 
+| SGD (0.001) | Deeplabv3 | | | 82.42| 41
 | SGD (0.1) | Deeplabv3 | | |83.99|46.64 
-|  | | |Weather DA | | 
+|  | | |Weather DA | 66.32| 17
 
 
 #### Test results
@@ -240,17 +251,17 @@ The previous metrics were taken in the validation phase of our training. Conclud
 | Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
 | Adam (0.001) |  UNet| Linear| | 76.7| 38
-|  |  | Bilinear 3x3/1| | 77.9| 40
-|  |  | Bilinear 1x1| |78.5 | 42
-|  |  | Transpose| | 78.3| 43
+|  |  | Bilinear| | 77.9| 40
+|  |  | Transpose 3x3/1| |78.5 | 42
+|  |  | Transpose 1x1| | 78.28| 43
 | SGD (0.001) | | Transpose| |75.3 | 31
 | Adam (0.001) |  | Transpose|DA |77.3 | 39
 |  |  | Transpose|DA & IF |70.16 |34 
 |  |  | Transpose|Weather DA |75.72 | 35
 |  | Deeplabv3 | | |76.86 | 39
-| SGD (0.001) | Deeplabv3 | | | | 
+| SGD (0.001) | Deeplabv3 || |76.88|41
 | SGD (0.1) | Deeplabv3 | | |78.73| 46
-|  | | |Weather DA | | 
+|  | | |Weather DA | 61.91| 16
 
 
 ### Other comparisons
@@ -286,6 +297,9 @@ Our last experiment was changing the learning rate of the optimizer. We did it o
 ## Conclusion
 
 (we should decide what out conclusions for the project are and insert here)
+
+What drove us during the whole process of experimentation was the evidence that came out. What we searched over and over through proposals was improvement. But unfortunately we didn't find much, at least in the amount we expected. We did expect to see self-evident results as we have been seeing throught the course in the labs and in the ML books, but maybe we had a stroke of reality. This is the nature of science and engineering.
+
 ![Linear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/linear.gif)
 ![Bilinear timeline](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/bilinear.gif)
 
