@@ -90,7 +90,8 @@ An optimizer is necessary for minimizing the loss function. In this project both
 ### Concatenation Layer
 Since the U-net downsamples the feature information in the first half of the network, there is a risk of loosing valuable information. To overcome this, we concatenated all the feature maps in the decoding layers with the feature maps from the encoding layers. This assures that any information learned in the ignitions layers will be retained throughout the network. 
 
-![Concat Layers](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Unet%2BConcat.png)
+![Concat Layers](https://github.com/rosamarielafierro/outdoorsegmentation/blob/master/figures/Unet_concat.png)
+
 
 ### Bi-linear Interpolation
 In order to recover the original input resolution at the output of the network, a bi-linear interpolation was performed. For bi-linear interpolation, a weighted average is calculated on the four nearest pixels to achieve a smooth output. The data was interpolated along 2-axis during upsampling, following the following formula,
