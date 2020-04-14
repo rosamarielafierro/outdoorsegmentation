@@ -23,21 +23,38 @@ The repository is structured as follows:
 
 Based on our team's collective interest in computer vision we decided to pursue a semantic segmentation task, using deep learning to classify objects in road scenarios to further the development of self-driving cars.
 
-## Proposal
- - [x] Analyze the data provided in the selected dataset and adapt it to be used in a Semantic Segmentation network.
- - [x] Mitigate the class imbalance based on a better understanding of our data.
- - [x] Learn how to do a transfer learning from the previous task to another one, for instance, detecting the drivable area.
- - [x] Reproduce a semantic segmentation network described in the U-Net paper from scratch.
- - [x] Apply data augmentation, generate different kinds of weather such as fog, rain, snowflakes.
+## Semantic Segmentation.
 
-## Milestones
+Segmentation has existed for a very long time in the domain of Computer Vision and Image processing. Some of the techniques are simple thresholding, clustering based methods such as k means clustering-segmentation, region growing methods, etc. Semantic segmentation aims at labeling categories(classes) at the pixel-level of an image.
+Pixel-wise segmentation of the objects results in a more natural description of the scene and may provide additional information for subsequent processing steps.
+Segmentation based tracking results are non-overlapping and can thus be compared to ground truth in a straightforward manner.
+
+## Main Goal
+
+The task that the designed neural networks have to perform is:  accurately classify multiple object categories in an image at pixel level. 
+
+## Goal Proposal
+ - [x] DATASET: Analyze the data provided in the selected dataset and adapt it to be used in a Semantic Segmentation network.
+ - [x] UNET NETWROK: Reproduce a semantic segmentation network described in the U-Net paper from scratch.
+ - [x] BALANCE CLASSES: Mitigate the class imbalance based on a better understanding of our data.
+ - [x] DATA AUGMENTATION: Apply data augmentation, generate different kinds of weather such as fog, rain, snowflakes.
+ - [x] TRANSFER LEARNING: Learn how to do a transfer learning from the previous task to another one, for instance, detecting the drivable area.
+
+
+## Milestones - Experiments
 
  - [x] Obtain and process the Cityscapes dataset.
  - [x] Train a semantic segmentation network and analyze the results.
- - [x] Use weighted Loss.
- - [x] Apply data augmentation.
+ - [x] Modify U-net and Compare Results
+       - Use weighted Loss.
+       - Concatenations
+       - Transposed Convolutions
+       - Data Augmentation
+       - Inverted Weights
+       - Weather Conditions
+ - [x] Change Optimizer / Learning rate (both networks)
+ - [x] Transfer Learning:  Implement DeepLabv3 Model
  - [ ] Use model for selecting drivable area.
-
 ## Dataset
 The Cityscapes dataset includes a diverse set of street scene image captures from 50 different cities around the world designed specifically for training segmentation models. The dataset includes semantic, instance-wise, and dense pixel annotation for a total of 30 classes. The dataset consists of 5,000 images at a resolution of 1024x2048.
 
@@ -89,7 +106,7 @@ This allows the network to reduce spatial information while increasing feature i
 ##### Concatenation Layer
 Since the U-net downsamples the feature information in the first half of the network, there is a risk of loosing valuable information. To overcome this, we concatenated all the feature maps in the decoding layers with the feature maps from the encoding layers. This assures that any information learned in the ignitions layers will be retained throughout the network.
 
-![Concat Layers](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/Unet%2BConcat.png)
+![Concat Layers](https://github.com/rosamarielafierro/outdoorsegmentation/blob/master/figures/Unet_concat.png)
 
 ##### Bi-linear Interpolation
 In order to recover the original input resolution at the output of the network, a bi-linear interpolation was performed. For bi-linear interpolation, a weighted average is calculated on the four nearest pixels to achieve a smooth output. The data was interpolated along 2-axis during upsampling, following the following formula,
