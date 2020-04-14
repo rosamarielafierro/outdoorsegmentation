@@ -1,8 +1,10 @@
+
 ## Repository Structure
 
 The repository is structured as follows:
- - Figures - folder containing project images.
- - Toolbox - folder containing two auxiliar tools for working with the dataset: transforming the labels merging some of the classes, creating csv files for loading the images in the dataset and getting stats for class imbalance.
+- experiments -  folder containing an example of the experiments conducted
+ - figures - folder containing project images.
+ - toolbox - folder containing two auxiliar tools for working with the dataset: transforming the labels merging some of the classes, creating csv files for loading the images in the dataset and getting stats for class imbalance.
  - Dataset.py - python file containing the dataset class.
  - Train.py - python file containing the train class.
  - Test.py - python file used for doing only the Test step.
@@ -115,7 +117,7 @@ An optimizer is necessary for minimizing the loss function. In this project both
 
 Evaluating and comparing the experiments is a nuclear part of the scientific work and opens the path to adjust parameters and propose changes. For this project we defined several metrics to compare models and trainings
 
-#### Accuracy
+#### Pixel accuracy
 
 The main metric we used to evaluate the experiments if the accuracy of the model configuration. The model prediction accuracy is calculated dividing the number of encerted pixels by the number of total pixels. However, there is a class that we are ignoring throughout the experiments and does not compute for the accuracy. This class represents objects in the images that are not useful for our purposes (thrash cans and other street objects)
 
@@ -130,7 +132,7 @@ The other metric that illuminated our grievous path through the fathomless darkn
 
 Throughout the process of building a strong model, multiple experiments were conducted in order to track progress. We stuck with the configuration that gave us better results until the moment and build on top of it.
 
-### Experiment 1: Linear UNet
+### Experiment 1: UNet (without concats)
 
 In the very beginning, we decided to build an easy-to-code, lightweight model that worked for us to see a nice segmentation result easy to understand and easy to be improved by adding components to the configuration. It also gave some hints about the base results we could achieve.
 It was intended as well to act as a base-line for the all future experiments. It consisted of a linear version (removing the concatenations) of the UNet. Easy as it was, such a model casts very little precision to the prediction. For this implementation, we decoder phase made use of *torch.nn.Upsample* to upsample the encoded features.
@@ -140,9 +142,9 @@ As an optimizer we chose Adam because it needs no additional tuning or adjust hy
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
-|--|--|--|--|--|--|
-| Adam (0.001) |  UNet| Linear||82.25 | 40.1
+| Optimizer (LR) | Model | Version | Pixel accuracy (%) | mIoU (%) |
+|--|--|--|--|--|
+| Adam (0.001) |  UNet| no concats|82.25 | 40.1
 
 ### Experiment 2: UNet full
 For the second experiments, we improved the network to embrace the concatenations defined in the canonical net. After achieving a not so bad accuracy result of 75%, we moved on to reproduce the full UNet. This of course turned into computational and practical adjustments such as reducing the batch size and we had to wait longer for the experiment to give results.
@@ -164,7 +166,7 @@ The results, apart from the quantitative side, have shown a real qualitative eff
 #### Bilinear Interpolation:  Kernel 3 Padding 1 vs Kernel 1
 
 As earlier said, we used *torch.nn.UpSample* as the component to upsample the encoded features.
-In the original experiment, shown before, we included the Kernel size 1 in the last step as presented in the original paper. However, we wanted to test if using a wider kernel (3x3), it can keep better the spatial information for the feature extraction than the orginal 1x1 one.
+We did modify the original experiment substituting the transposed convolutions for the convolutions Kernel size 1 in the last step. However, we wanted to test if using a wider kernel (3x3), it can keep better the spatial information for the feature extraction than the orginal 1x1 one.
 
 ~~~
     #New
@@ -192,9 +194,9 @@ There are several other methods to perform the upsampling and we chose the Trans
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
-|--|--|--|--|--|--|
-| Adam (0.001) | UNet|Transpose| |83.64|44.01  
+| Optimizer (LR) | Model | Version  | Accuracy (%) | mIoU (%) |
+|--|--|--|--|--|
+| Adam (0.001) | UNet|Transpose| 83.64|44.01  
 
 
 ### Experiment 3: Change optimizer
@@ -242,10 +244,11 @@ the inverted frequency is calculated as the inversion of the normalized number o
 The results of this experiment were not as good as expected. We also discarded to keep using this technique in our following experiments.
 
 #### Results
+These results are obtained using the validation split
 
 | Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
-| Adam (0.001) |  UNet| Transpose|DA & IF |75.14|35.09
+| Adam (0.001) |  UNet| Transpose|Data augm & Inverted freq |75.14|35.09
 
 
 ### Experiment 6: Weather Augmentation
@@ -361,7 +364,7 @@ The highest mIoU is reached by deeplabv3 with a learning rate of 0.1 but at some
 
 | Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
-| Adam (0.001) |  UNet| Linear||82.25 | 40.1
+| Adam (0.001) |  UNet| No concats||82.25 | 40.1
 | Adam (0.001) |  UNet| Bilinear 1x1|| 83.46 | 43.23
 | Adam (0.001) |  UNet| Bilinear 3x3/1||83.13 |41.7
 | Adam (0.001) |  UNet| Transpose| |83.64|44.01  
