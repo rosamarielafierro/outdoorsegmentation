@@ -158,9 +158,9 @@ The results, apart from the quantitative side, have shown a real qualitative eff
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
-|--|--|--|--|--|--|
-| Adam (0.001) | UNet|  Bilinear 1x1|| 83.46 | 43.23
+| Optimizer (LR) | Model | Version  | Pixel accuracy (%) | mIoU (%) |
+|--|--|--|--|--|
+| Adam (0.001) | UNet|  Bilinear 1x1| 83.46 | 43.23
 
 
 #### Bilinear Interpolation:  Kernel 3 Padding 1 vs Kernel 1
@@ -181,9 +181,9 @@ However, the results were not good enough and seems to not support this hypothes
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
-|--|--|--|--|--|--|
-| Adam (0.001) | UNet| Bilinear 3x3/1||83.13 |41.7
+| Optimizer (LR) | Model | Version | Pixel accuracy (%) | mIoU (%) |
+|--|--|--|--|--|
+| Adam (0.001) | UNet| Bilinear 3x3/1|83.13 |41.7
 
 
 
@@ -194,7 +194,7 @@ There are several other methods to perform the upsampling and we chose the Trans
 
 #### Results
 
-| Optimizer (LR) | Model | Version  | Accuracy (%) | mIoU (%) |
+| Optimizer (LR) | Model | Version  | Pixel accuracy (%) | mIoU (%) |
 |--|--|--|--|--|
 | Adam (0.001) | UNet|Transpose| 83.64|44.01  
 
@@ -207,9 +207,9 @@ For our next experiment and before introducing other techniques, we decided to c
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
-|--|--|--|--|--|--|
-| SGD (0.001) | Unet | Transpose|| 80.89|34.26
+| Optimizer (LR) | Model | Version | Pixel accuracy (%) | mIoU (%) |
+|--|--|--|--|--|
+| SGD (0.001) | Unet | Transpose| 80.89|34.26
 
 
 
@@ -222,7 +222,7 @@ Training the network with this technique makes it generalize better on new sampl
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
+| Optimizer (LR) | Model | Version | Configuration | Pixel accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
 | Adam (0.001) | UNet | Transpose|DA | 82.77| 41.33
 
@@ -246,7 +246,7 @@ The results of this experiment were not as good as expected. We also discarded t
 #### Results
 These results are obtained using the validation split
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
+| Optimizer (LR) | Model | Version | Configuration | Pixel accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
 | Adam (0.001) |  UNet| Transpose|Data augm & Inverted freq |75.14|35.09
 
@@ -265,7 +265,7 @@ And the results:
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
+| Optimizer (LR) | Model | Version | Configuration | Pixel accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
 | Adam (0.001) |  UNet| Transpose|Weather DA |81.28|38.41
 
@@ -279,9 +279,9 @@ With the basic configuration we didn't achieve better results. This is the reaso
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
-|--|--|--|--|--|--|
-| Adam (0.001) | Deeplabv3 | | |82.32|39.47
+| Optimizer (LR) | Model |  Pixel accuracy (%) | mIoU (%) |
+|--|--|--|--|
+| Adam (0.001) | Deeplabv3 |82.32|39.47
 
 
 ### Experiment 8: Change Deeplabv3 optimizer
@@ -293,9 +293,9 @@ The results with SGD were better than using Adam, but not achieving the best res
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
-|--|--|--|--|--|--|
-| SGD (0.001) | Deeplabv3 | | | 82.42| 41
+| Optimizer (LR) | Model | Pixel accuracy (%) | mIoU (%) |
+|--|--|--|--|
+| SGD (0.001) | Deeplabv3  | 82.42| 41
 
 
 ### Experiment 9: Change learning rate
@@ -305,9 +305,9 @@ At this point we hadn't tune the hyperparameters so we decided to explore how th
 
 #### Results
 
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
-|--|--|--|--|--|--|
-| SGD (0.1) | Deeplabv3 | | |83.99|46.64
+| Optimizer (LR) | Model | Pixel accuracy (%) | mIoU (%) |
+|--|--|--|--|
+| SGD (0.1) | Deeplabv3 |83.99|46.64
 
 
 
@@ -318,14 +318,14 @@ As the last experiment, we added the same weather data augmentation we performed
 
 
 #### Results
-| Optimizer (LR) | Model | Version | Configuration | Accuracy (%) | mIoU (%) |
+| Optimizer (LR) | Model | Version | Configuration | Pixel accuracy (%) | mIoU (%) |
 |--|--|--|--|--|--|
 | SGD (0.1) | Deeplabv3 | |Weather DA | 66.32| 17
 
 
 The model has been penalized in the validation dataset but will generalize better for new real world samples. If we compare the results of our best model (DeepLabv3 - SGD - lr=1e-1) that achieved a mIoU of 46% in Test, and this model trained with weather conditions, all against the Test split including weather conditions we can see this effect:
 
-|Trained with weather conditions|Accuracy (%)| mIoU (%)| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15| 16 | 17 | 18 |
+|Trained with weather conditions|Pixel accuracy (%)| mIoU (%)| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15| 16 | 17 | 18 |
 |--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
 | Y |61.91 |16|**0.68** |0.26 |0.46 |0.04 |0.01 |0.05 |0.00 | 0.04| **0.44**| 0.06|0.30 |0.15 |0.00 |**0.42** |0.00 |0.0 |0.00 |0.00 |0.02
 | N |36.86| 8| **0.40** |0.1 |0.25 |0.01 |0.00 | 0.03| 0.00|0.03 |**0.08** |0.00 |0.22 |0.09 |0.01 |**0.13** |0.00|0.00 |0.00 |0.01 |0.07 |
@@ -337,6 +337,8 @@ The model has been penalized in the validation dataset but will generalize bette
 Evaluating and comparing the experiments is a nuclear part of the scientific work and opens the path to adjust parameters and propose changes. For this project we defined several metrics to compare models and trainings
 
 ### Accuracy
+
+
 Below it is shown the comparison among all the experiments:
 
 ![Accuracy validationgraph](https://github.com/it6aidl/outdoorsegmentation/blob/master/figures/accval.png)
@@ -344,6 +346,7 @@ Below it is shown the comparison among all the experiments:
 Here, we can see than the best experiment in terms of accur
 
 ### IoU per class
+
 As we presented in the dataset statistics, we have a noticeable class imbalance, which ends up in an unbalanced IoU. The classes that appear the most in the dataset (pavement, sky) reach a higher IoU than the ones that appear very few times (signals, traffic lights)
 
 
